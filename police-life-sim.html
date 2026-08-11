@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>警察人生模擬程式 · POLICE LIFE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0f14;
+    --bg2:#12161d;
+    --line:#242b35;
+    --paper:#e9e0c7;
+    --paper-ink:#2a2418;
+    --paper-line:#c9bd9a;
+    --yellow:#f2b705;
+    --blue:#3f7ea6;
+    --red:#b3392f;
+    --text:#e7e9ec;
+    --text-dim:#8892a0;
+    --text-dim2:#5c6472;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, #16202a 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Noto Sans TC',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  .app{
+    max-width:560px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+    background:
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      var(--bg2);
+  }
+
+  /* ---------- shell header ---------- */
+  .shell-head{
+    padding:14px 18px 12px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--bg);
+  }
+  .shell-head .tag{
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--text-dim2);
+  }
+  .shell-head .badge{
+    width:26px;height:26px;
+    border:1.5px solid var(--yellow);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;
+    color:var(--yellow);
+    flex-shrink:0;
+  }
+
+  /* ---------- status bar (in-game) ---------- */
+  .statusbar{
+    padding:10px 18px;
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    display:none;
+  }
+  .statusbar.show{display:block;}
+  .statusbar .row1{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+  }
+  .statusbar .rank{
+    font-weight:900;
+    font-size:15px;
+    letter-spacing:.02em;
+  }
+  .statusbar .meta{
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  .statbars{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .statitem .lbl{
+    font-size:10px;
+    color:var(--text-dim2);
+    display:flex;justify-content:space-between;
+    margin-bottom:3px;
+  }
+  .statitem .lbl b{color:var(--text-dim);font-weight:500;}
+  .statitem .track{
+    height:4px;
+    background:#1c2129;
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .statitem .fill{
+    height:100%;
+    border-radius:2px;
+  }
+  .fill.body{background:var(--yellow);}
+  .fill.inv{background:var(--blue);}
+  .fill.rel{background:#7fa06f;}
+  .fill.int{background:#c98fd6;}
+
+  /* ---------- main ---------- */
+  main{
+    flex:1;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  /* ---------- start screen hero ---------- */
+  .hero-eyebrow{
+    font-size:11px;
+    color:var(--yellow);
+    letter-spacing:.16em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .hero-eyebrow::before{
+    content:"";
+    width:18px;height:1px;
+    background:var(--yellow);
+  }
+  h1.title{
+    font-size:30px;
+    font-weight:900;
+    line-height:1.15;
+    margin:6px 0 4px;
+    letter-spacing:.01em;
+  }
+  h1.title em{
+    display:block;
+    font-style:normal;
+    font-size:14px;
+    font-weight:500;
+    color:var(--text-dim);
+    margin-top:6px;
+    letter-spacing:.03em;
+  }
+  .tagline{
+    font-size:13.5px;
+    line-height:1.75;
+    color:var(--text-dim);
+    border-left:2px solid var(--blue);
+    padding-left:12px;
+  }
+
+  /* ---------- form card ---------- */
+  .card{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+  }
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;
+    font-size:11px;
+    color:var(--text-dim2);
+    letter-spacing:.08em;
+    margin-bottom:8px;
+  }
+  .field input[type=text]{
+    width:100%;
+    background:var(--bg2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:10px 12px;
+    font-size:14px;
+    font-family:'Noto Sans TC',sans-serif;
+    border-radius:var(--radius);
+  }
+  .field input[type=text]:focus{outline:2px solid var(--blue);outline-offset:1px;}
+
+  .track-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .track-opt{
+    border:1px solid var(--line);
+    background:var(--bg2);
+    padding:10px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    text-align:left;
+  }
+  .track-opt .icon{font-size:18px;}
+  .track-opt .name{font-size:13px;font-weight:700;margin:5px 0 3px;}
+  .track-opt .desc{font-size:11px;color:var(--text-dim);line-height:1.4;}
+  .track-opt.sel{border-color:var(--yellow);background:#1a1710;}
+  .track-opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+  .seedrow{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .seedrow .mono{
+    flex:1;
+    font-size:12.5px;
+    color:var(--text-dim);
+    background:var(--bg2);
+    border:1px solid var(--line);
+    padding:9px 10px;
+    border-radius:var(--radius);
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  .iconbtn{
+    background:var(--bg2);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    padding:9px 11px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-size:13px;
+    flex-shrink:0;
+  }
+  .iconbtn:hover{border-color:var(--blue);color:var(--text);}
+  .seedhint{font-size:10.5px;color:var(--text-dim2);margin-top:7px;line-height:1.5;}
+
+  .btn-primary{
+    width:100%;
+    background:var(--yellow);
+    color:#1a1400;
+    border:none;
+    font-weight:700;
+    font-size:15px;
+    padding:14px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    letter-spacing:.02em;
+    font-family:'Noto Sans TC',sans-serif;
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-secondary{
+    width:100%;
+    background:transparent;
+    color:var(--text-dim);
+    border:1px solid var(--line);
+    font-size:13px;
+    padding:11px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-family:'Noto Sans TC',sans-serif;
+  }
+  .btn-secondary:hover{border-color:var(--text-dim);color:var(--text);}
+
+  .disclaimer{
+    font-size:10.5px;
+    color:var(--text-dim2);
+    line-height:1.6;
+    text-align:center;
+    padding-top:4px;
+  }
+
+  /* ---------- stage / case-file card (paper) ---------- */
+  .stageprog{
+    font-size:10.5px;
+    color:var(--text-dim2);
+    letter-spacing:.1em;
+    display:flex;
+    justify-content:space-between;
+  }
+  .file-card{
+    background:var(--paper);
+    color:var(--paper-ink);
+    border-radius:var(--radius);
+    padding:18px 18px 16px;
+    position:relative;
+    box-shadow:0 8px 22px -10px rgba(0,0,0,.55);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0px, transparent 1px, transparent 26px, rgba(0,0,0,0.025) 27px);
+  }
+  .file-card::before{
+    content:"檔案";
+    position:absolute;
+    top:-9px; left:16px;
+    background:var(--red);
+    color:#fff;
+    font-size:10px;
+    padding:2px 8px;
+    letter-spacing:.1em;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .file-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:#6b6144;
+    margin-bottom:8px;
+    letter-spacing:.03em;
+  }
+  .file-title{
+    font-size:17px;
+    font-weight:900;
+    margin-bottom:10px;
+    letter-spacing:.01em;
+  }
+  .file-body{
+    font-size:13.5px;
+    line-height:1.85;
+  }
+
+  .choices{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .choice-btn{
+    text-align:left;
+    background:var(--bg);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:12px 14px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-family:'Noto Sans TC',sans-serif;
+    font-size:13.5px;
+    line-height:1.5;
+  }
+  .choice-btn:hover{border-color:var(--yellow);background:#1a1710;}
+  .choice-btn:focus-visible{outline:2px solid var(--blue);outline-offset:1px;}
+  .choice-btn .note{
+    display:block;
+    font-size:11px;
+    color:var(--text-dim2);
+    margin-top:4px;
+  }
+
+  /* ---------- resolution / stamp ---------- */
+  .resolve-wrap{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .stamp{
+    align-self:center;
+    border:3px solid var(--blue);
+    color:var(--blue);
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:.12em;
+    padding:8px 20px;
+    border-radius:6px;
+    transform:rotate(-7deg) scale(0.6);
+    opacity:0;
+    animation:stampin .38s cubic-bezier(.2,1.6,.4,1) forwards;
+    animation-delay:.08s;
+  }
+  .stamp.bad{border-color:var(--red);color:var(--red);}
+  .stamp.gold{border-color:var(--yellow);color:var(--yellow);}
+  @keyframes stampin{
+    0%{opacity:0;transform:rotate(-7deg) scale(0.5);}
+    60%{opacity:1;transform:rotate(-7deg) scale(1.08);}
+    100%{opacity:1;transform:rotate(-7deg) scale(1);}
+  }
+  .log-entry{
+    font-size:13px;
+    line-height:1.75;
+    color:var(--text-dim);
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-left:2px solid var(--blue);
+    padding:11px 13px;
+    border-radius:var(--radius);
+  }
+  .delta-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+  }
+  .delta{
+    padding:3px 8px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    color:var(--text-dim);
+  }
+  .delta.pos{color:#8fd68f;border-color:#2d4a2d;}
+  .delta.neg{color:#e39a92;border-color:#4a2d2d;}
+
+  /* ---------- career log ---------- */
+  .careerlog{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+  .careerlog summary{
+    font-size:11px;
+    color:var(--text-dim2);
+    letter-spacing:.1em;
+    cursor:pointer;
+    padding:6px 0;
+  }
+  .careerlog .items{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:180px;
+    overflow-y:auto;
+    padding:8px 0 2px;
+  }
+  .careerlog .item{
+    font-size:11.5px;
+    color:var(--text-dim2);
+    line-height:1.6;
+    border-bottom:1px dashed var(--line);
+    padding-bottom:6px;
+  }
+  .careerlog .item b{color:var(--text-dim);font-weight:500;}
+
+  /* ---------- ending ---------- */
+  .end-badge{
+    text-align:center;
+    padding:22px 14px 18px;
+  }
+  .end-badge .rank-final{
+    width:64px;height:64px;
+    margin:0 auto 12px;
+    border:2px solid var(--yellow);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+  }
+  .end-badge h2{
+    font-size:22px;
+    font-weight:900;
+    margin:0 0 6px;
+  }
+  .end-badge .sub{
+    font-size:12px;
+    color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .end-body{
+    font-size:13.5px;
+    line-height:1.85;
+    color:var(--text-dim);
+  }
+  .final-stats{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+  .fs-item{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:10px 12px;
+  }
+  .fs-item .n{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;}
+  .fs-item .l{font-size:10.5px;color:var(--text-dim2);margin-top:2px;}
+
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="shell-head">
+    <span class="tag mono">POLICE LIFE · 警察人生模擬程式</span>
+    <div class="badge">警</div>
+  </div>
+  <div class="statusbar" id="statusbar"></div>
+  <main id="screen"></main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= RNG ================= */
+  function makeRng(seedStr){
+    let h = 1779033703 ^ seedStr.length;
+    for (let i = 0; i < seedStr.length; i++) {
+      h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    return function(){
+      h = Math.imul(h ^ (h >>> 16), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    };
+  }
+  const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  function genSeed(len){
+    len = len || 8;
+    let s = "";
+    for (let i=0;i<len;i++) s += ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
+    return s;
+  }
+
+  /* ================= DATA ================= */
+  const RANKS = ['警專學生','警員','資深警員','巡佐','巡官','警正','分局長','警察局長'];
+
+  const TRACKS = [
+    {id:'detective', name:'刑事鑑識組', icon:'🔍', desc:'追查真相，靠腦不靠拳頭。', bonus:{偵查:12}},
+    {id:'patrol',    name:'行政巡邏組', icon:'🚓', desc:'街頭第一線，人情練達即文章。', bonus:{人脈:12}},
+    {id:'traffic',   name:'交通警察組', icon:'🚦', desc:'風吹日曬雨淋，體力是本錢。', bonus:{體能:12}},
+    {id:'security',  name:'保安維安組', icon:'🛡️', desc:'鎮暴維安第一線，紀律至上。', bonus:{體能:8,操守:4}},
+  ];
+
+  const STAGES = [
+    {
+      id:'academy1', label:'警專新生', ageJump:0,
+      fileNo:'CASE 01 · 養成教育',
+      intro: s => `你剛踏入警察專科學校的大門，教官的口令聲迴盪在操場上。三年的養成教育，將決定你未來能走多遠。`,
+      choices:[
+        {label:'凌晨五點跟著學長跑操場', effects:{體能:7,操守:1}, salary:5},
+        {label:'把行政法典啃到滾瓜爛熟', effects:{偵查:6,操守:2}, salary:5},
+        {label:'混熟班上每個同學的背景', effects:{人脈:7,操守:-1}, salary:5},
+      ],
+      events:[
+        {text:'體能測驗差點被刷掉，你咬牙補考才過關。', effects:{體能:-2}},
+        {text:'小考意外拿下班排第一，教官記住了你的名字。', effects:{偵查:3}},
+        {text:'幫同學代寫報告被抓到，記了一支申誡。', effects:{操守:-3}},
+        {text:'新生訓練平安落幕，日子過得很規律。', effects:{}},
+      ],
+    },
+    {
+      id:'academy2', label:'畢業分發', ageJump:2,
+      fileNo:'CASE 02 · 分發志願',
+      intro: s => `畢業在即，${s.name}，你必須決定第一份工作要去哪裡——這個選擇會形塑你未來十年的路。`,
+      choices:[
+        {label:'申請直轄市大型分局', note:'案量大、升遷快，但競爭激烈', effects:{人脈:5,體能:2}, salary:80},
+        {label:'申請偏鄉派出所', note:'磨基本功，人情味重', effects:{偵查:3,操守:5}, salary:50},
+        {label:'考特考轉刑事鑑識線', note:'專業掛帥，起步較辛苦', effects:{偵查:9,操守:-1}, salary:70},
+      ],
+      events:[
+        {text:'分發放榜當天，同梯戲稱你是「幸運兒」。', effects:{}},
+        {text:'報到第一天就遇上鬧場民眾，菜鳥的震撼教育。', effects:{體能:2}},
+        {text:'學長私下提醒你分局裡的眉眉角角。', effects:{人脈:3}},
+        {text:'報到手續出了包，被主管唸了一頓。', effects:{操守:-2}},
+      ],
+    },
+    {
+      id:'patrol1', label:'基層歷練', ageJump:3,
+      fileNo:'CASE 03 · 勤務日常',
+      intro: s => `每天的勤務表排得滿滿：臨檢、家暴通報、酒駕攔查、街頭調解……你開始真正理解這份工作的重量。`,
+      choices:[
+        {label:'認真寫好每一份筆錄', effects:{偵查:5,操守:3}, salary:30},
+        {label:'跟轄區里長搏感情、博聲量', effects:{人脈:6}, salary:30},
+        {label:'能拖就拖，準時下班最重要', effects:{體能:4,操守:-2}, salary:30},
+      ],
+      events:[
+        {text:'深夜攔查一輛超速機車，意外查獲通緝犯，記了一支嘉獎。', effects:{偵查:3}},
+        {text:'處理家暴案時被潑了一身酒，回家換了三次衣服。', effects:{體能:-3}},
+        {text:'轄區里長送來一箱水果，說是感謝你巡邏勤快。', effects:{人脈:2}},
+        {text:'值班打瞌睡被督察抓到，被要求寫自白書。', effects:{操守:-4}},
+      ],
+    },
+    {
+      id:'exam1', label:'升遷考試・巡佐', ageJump:3, exam:true, rankTarget:3,
+      fileNo:'CASE 04 · 資格考核',
+      intro: s => `巡佐考試在即。你可以拚死拚活準備筆試，也可以靠年資與人脈慢慢熬——這是體力與時間的第一場豪賭。`,
+      choices:[
+        {label:'請假閉關苦讀三個月', effects:{偵查:6,體能:-3}, bonus:0.18, salary:20},
+        {label:'邊上班邊準備，穩紮穩打', effects:{偵查:4,人脈:2}, bonus:0.10, salary:20},
+        {label:'靠年資排隊，佛系應考', effects:{操守:2,體能:2}, bonus:0.0, salary:10},
+      ],
+    },
+    {
+      id:'case1', label:'重大專案・毒品查緝', ageJump:4,
+      fileNo:'CASE 05 · 專案偵辦',
+      intro: s => `分局接獲線報，你被編入緝毒專案小組，追查一條運毒管道。指揮官暗示：睜一隻眼閉一隻眼，紅包少不了你的份。`,
+      choices:[
+        {label:'堅持依法蒐證，絕不放水', effects:{操守:10,偵查:4}, salary:30, flag:'clean'},
+        {label:'睜一隻眼閉一隻眼，收下紅包', effects:{操守:-15,人脈:6}, salary:150, flag:'corrupt'},
+        {label:'私下向督察室檢舉整起關說', effects:{操守:15,人脈:-8}, salary:10, flag:'whistle'},
+      ],
+      events:[
+        {text:'案件成功偵破，媒體大幅報導，你意外成了新聞焦點。', effects:{偵查:5,人脈:3}},
+        {text:'案子破了，但功勞被上級拿走大半。', effects:{}},
+        {text:'行動走漏風聲，主嫌逃逸，你被寫報告檢討。', effects:{偵查:-3,操守:-1}},
+      ],
+    },
+    {
+      id:'exam2', label:'升遷考試・巡官／警正', ageJump:5, exam:true, rankTarget:5,
+      fileNo:'CASE 06 · 職涯分岔',
+      intro: s => `你來到職涯的分岔口：走行政管理衝分局長，還是深耕偵查專攻大案，又或者申請外派國際刑警組織（Interpol）協查跨國案件？`,
+      choices:[
+        {label:'衝行政資歷，準備巡官考試', effects:{人脈:8,體能:-2}, bonus:0.12, salary:60},
+        {label:'深耕偵查專業，主攻大案指揮', effects:{偵查:9,操守:1}, bonus:0.14, salary:60},
+        {label:'申請外派國際刑警組織駐外', note:'罕見機會，眼界大開', effects:{偵查:5,人脈:5,體能:2}, bonus:0.08, salary:120, flag:'interpol'},
+      ],
+    },
+    {
+      id:'midlife', label:'中年抉擇', ageJump:7,
+      fileNo:'CASE 07 · 灰色地帶',
+      intro: s => `體檢報告顯示血壓偏高。同時你接到一通「老朋友」的電話——地方民代想請你在一件工程弊案上高抬貴手，家人則希望你能少加點班。`,
+      choices:[
+        {label:'拒絕關說，依法簽辦到底', effects:{操守:12,人脈:-5}, salary:20},
+        {label:'睜隻眼閉隻眼，換取仕途平順', effects:{操守:-14,人脈:8}, salary:120, flag:'corrupt2'},
+        {label:'申請調動內勤，多陪陪家人', effects:{體能:8,人脈:-3}, salary:20},
+      ],
+      events:[
+        {text:'清廉辦案的事蹟被地方報導，你成了模範警察候選人。', effects:{操守:3}, needMin:{操守:60}},
+        {text:'健康檢查亮紅燈，醫生要求你調整作息。', effects:{體能:-6}},
+        {text:'日子照舊，勤務排班一如往常。', effects:{}},
+      ],
+    },
+    {
+      id:'senior', label:'資深警官', ageJump:8,
+      fileNo:'CASE 08 · 老將歲月',
+      intro: s => `你已是分局裡資歷最深的警官之一，年輕後輩喊你一聲「前輩」。體力大不如前，但案件與勤務依然不會少一件。`,
+      choices:[
+        {label:'帶頭衝第一線，證明老將寶刀未老', effects:{體能:-8,偵查:5,人脈:3}, salary:40, risky:true},
+        {label:'轉任訓練教官，傳承經驗', effects:{人脈:6,操守:4,體能:2}, salary:40},
+        {label:'申請調任內勤主管，穩定收工', effects:{體能:6,偵查:-2}, salary:40},
+      ],
+      events:[
+        {text:'帶的新人在你的指導下破了大案，特別來謝謝你。', effects:{人脈:3}},
+        {text:'舊傷復發，你被迫請了兩週病假。', effects:{體能:-4}},
+        {text:'平順的一年，沒有太多波瀾。', effects:{}},
+      ],
+    },
+  ];
+
+  const RETIRE_CHOICES = [
+    {label:'申請退休，安享天年', effects:{}, salary:30, key:'early'},
+    {label:'拚到屆齡退休最後一刻，力求最高階級', effects:{偵查:3,人脈:3}, salary:60, key:'push', bonus:0.16},
+    {label:'婉拒退休，接受借調擔任顧問', note:'極少數機會', effects:{操守:2,人脈:4}, salary:100, key:'advise'},
+  ];
+
+  /* ================= STATE ================= */
+  let state = null;
+
+  function initState(seedStr, name, trackId){
+    const rng = makeRng(seedStr);
+    const track = TRACKS.find(t=>t.id===trackId) || TRACKS[0];
+    const stats = {體能:0,偵查:0,人脈:0,操守:0};
+    Object.keys(stats).forEach(k=>{
+      stats[k] = Math.round(16 + rng()*13) + (track.bonus[k]||0);
+      stats[k] = clamp(stats[k]);
+    });
+    return {
+      seed: seedStr,
+      rng: rng,
+      name: name || '無名警員',
+      track: track,
+      age: 18,
+      year: 2026,
+      rankIdx: 1,
+      salary: 0,
+      stats: stats,
+      stageIndex: 0,
+      log: [],
+      flags: {},
+      fileNumber: String(1000 + Math.floor(rng()*8999)),
+    };
+  }
+
+  function clamp(v){ return Math.max(0, Math.min(99, Math.round(v))); }
+  function overall(s){ return Math.round((s.stats.體能 + s.stats.偵查 + s.stats.人脈)/3); }
+  function rankName(s){ return RANKS[s.rankIdx]; }
+
+  function applyEffects(s, effects){
+    const applied = {};
+    Object.keys(effects||{}).forEach(k=>{
+      if (k==='操守' || k==='體能' || k==='偵查' || k==='人脈'){
+        const before = s.stats[k];
+        s.stats[k] = clamp(s.stats[k] + effects[k]);
+        applied[k] = s.stats[k]-before;
+      }
+    });
+    return applied;
+  }
+
+  /* ================= RENDER HELPERS ================= */
+  const screen = document.getElementById('screen');
+  const statusbar = document.getElementById('statusbar');
+
+  function renderStatus(){
+    if (!state){ statusbar.classList.remove('show'); return; }
+    statusbar.classList.add('show');
+    const s = state;
+    statusbar.innerHTML = `
+      <div class="row1">
+        <span class="rank">${rankName(s)} · ${s.name}</span>
+        <span class="meta mono">${s.age}歲 / ${s.year}年 / ${s.salary}萬</span>
+      </div>
+      <div class="statbars">
+        ${statItem('體能', s.stats.體能, 'body')}
+        ${statItem('偵查', s.stats.偵查, 'inv')}
+        ${statItem('人脈', s.stats.人脈, 'rel')}
+        ${statItem('操守', s.stats.操守, 'int')}
+      </div>`;
+  }
+  function statItem(label, val, cls){
+    return `<div class="statitem">
+      <div class="lbl"><span>${label}</span><b>${val}</b></div>
+      <div class="track"><div class="fill ${cls}" style="width:${val}%"></div></div>
+    </div>`;
+  }
+
+  function careerLogHTML(){
+    if (!state.log.length) return '';
+    const items = state.log.slice().reverse().map(l=>`<div class="item"><b>${l.age}歲</b>　${l.text}</div>`).join('');
+    return `<details class="careerlog">
+      <summary>生涯記事（${state.log.length}）▾</summary>
+      <div class="items">${items}</div>
+    </details>`;
+  }
+
+  /* ================= SCREENS ================= */
+  function screenStart(){
+    renderStatus();
+    let selectedTrack = TRACKS[0].id;
+    let seed = genSeed();
+
+    function draw(){
+      screen.innerHTML = `
+        <div class="hero-eyebrow mono">CASE FILE · 招募中</div>
+        <h1 class="title">警察人生<br>模擬程式<em>POLICE LIFE — 一場種子化的警察生涯模擬</em></h1>
+        <p class="tagline">從警專新生到警界名人堂，分發、專案、關說、殉職——每一個決定都算數。</p>
+
+        <div class="card">
+          <div class="field">
+            <label>姓名</label>
+            <input type="text" id="nameInput" maxlength="12" placeholder="輸入你的警員姓名">
+          </div>
+          <div class="field">
+            <label>警種選擇</label>
+            <div class="track-grid" id="trackGrid"></div>
+          </div>
+          <div class="field">
+            <label>世界種子（相同種子＋相同選擇＝相同人生）</label>
+            <div class="seedrow">
+              <span class="mono" id="seedDisplay">${seed}</span>
+              <button class="iconbtn" id="reseedBtn" title="換一個種子">↺</button>
+              <button class="iconbtn" id="importBtn" title="輸入朋友的種子碼">📥</button>
+            </div>
+            <div class="seedhint">可直接輸入朋友的種子碼，走一遍一模一樣的人生際遇。</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="startBtn">開始生涯 ▸ 警專新生</button>
+        <p class="disclaimer">本模擬純屬虛構，人生際遇如有雷同，純屬巧合。</p>
+      `;
+      const grid = document.getElementById('trackGrid');
+      grid.innerHTML = TRACKS.map(t=>`
+        <button class="track-opt ${t.id===selectedTrack?'sel':''}" data-id="${t.id}">
+          <div class="icon">${t.icon}</div>
+          <div class="name">${t.name}</div>
+          <div class="desc">${t.desc}</div>
+        </button>`).join('');
+      grid.querySelectorAll('.track-opt').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          selectedTrack = btn.dataset.id;
+          grid.querySelectorAll('.track-opt').forEach(b=>b.classList.remove('sel'));
+          btn.classList.add('sel');
+        });
+      });
+      document.getElementById('reseedBtn').addEventListener('click', ()=>{
+        seed = genSeed();
+        document.getElementById('seedDisplay').textContent = seed;
+      });
+      document.getElementById('importBtn').addEventListener('click', ()=>{
+        const v = prompt('輸入種子碼：', seed);
+        if (v && v.trim()){
+          seed = v.trim().toUpperCase();
+          document.getElementById('seedDisplay').textContent = seed;
+        }
+      });
+      document.getElementById('startBtn').addEventListener('click', ()=>{
+        const name = document.getElementById('nameInput').value.trim() || '無名警員';
+        state = initState(seed, name, selectedTrack);
+        pushLog('分發志願尚未決定，你剛從警專校門走出來。', true);
+        screenStage();
+      });
+    }
+    draw();
+  }
+
+  function pushLog(text, first){
+    state.log.push({age: state.age, text: text});
+  }
+
+  function currentStage(){
+    return STAGES[state.stageIndex];
+  }
+
+  function screenStage(){
+    renderStatus();
+    const stage = currentStage();
+    if (!stage){ screenRetire(); return; }
+
+    screen.innerHTML = `
+      <div class="stageprog mono">
+        <span>第 ${state.stageIndex+1} / ${STAGES.length+1} 階段</span>
+        <span>${stage.fileNo}</span>
+      </div>
+      <div class="file-card">
+        <div class="file-num mono">FILE No. ${state.fileNumber}-${state.stageIndex+1} ／ ${stage.label}</div>
+        <div class="file-title">${stage.label}</div>
+        <div class="file-body">${stage.intro(state)}</div>
+      </div>
+      <div class="choices" id="choiceWrap"></div>
+      ${careerLogHTML()}
+    `;
+    const wrap = document.getElementById('choiceWrap');
+    stage.choices.forEach((c, idx)=>{
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerHTML = `${c.label}${c.note?`<span class="note">${c.note}</span>`:''}`;
+      btn.addEventListener('click', ()=> resolveChoice(stage, c));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function resolveChoice(stage, choice){
+    const s = state;
+    const applied = applyEffects(s, choice.effects);
+    s.salary += (choice.salary||0);
+    if (choice.flag) s.flags[choice.flag] = true;
+
+    let stampHTML = '';
+    let resultText = '';
+    let extraApplied = {};
+
+    if (stage.exam){
+      const chance = clamp01(
+        (s.stats.偵查*0.4 + s.stats.人脈*0.35 + s.stats.操守*0.15 + s.stats.體能*0.10)/99 + (choice.bonus||0)
+      );
+      const roll = s.rng();
+      if (roll < chance){
+        s.rankIdx = Math.min(choice.rankTarget, RANKS.length-1);
+        s.salary += 60;
+        stampHTML = `<div class="stamp">考核 · 及格</div>`;
+        resultText = `放榜當天，你的名字出現在合格名單上——晉任「${rankName(s)}」。`;
+      } else {
+        stampHTML = `<div class="stamp bad">考核 · 未通過</div>`;
+        resultText = `差了臨門一腳，這次考核未能通過。主管拍拍你的肩：「下一次。」`;
+        extraApplied = applyEffects(s, {偵查:1});
+      }
+    } else if (stage.events && stage.events.length){
+      const pool = stage.events.filter(e => !e.needMin || Object.keys(e.needMin).every(k=>s.stats[k]>=e.needMin[k]));
+      const ev = pool[Math.floor(s.rng()*pool.length)] || stage.events[stage.events.length-1];
+      resultText = ev.text;
+      extraApplied = applyEffects(s, ev.effects);
+      if (stage.id==='case1' || stage.id==='midlife'){
+        stampHTML = `<div class="stamp ${choice.flag && choice.flag.indexOf('corrupt')>-1 ? 'bad':'gold'}">${choice.flag && choice.flag.indexOf('corrupt')>-1 ? '案件 · 列管':'案件 · 結案'}</div>`;
+      }
+    } else {
+      resultText = '這段日子平順地過去了。';
+    }
+
+    // senior stage risk of line-of-duty death
+    if (stage.id==='senior' && choice.risky){
+      const roll = s.rng();
+      if (roll < 0.07){
+        s.flags.duty_death = true;
+        stampHTML = `<div class="stamp bad">殉職</div>`;
+        resultText = `執行圍捕任務時，你為了掩護後進而身受重傷，最終不治。你的名字，將被刻在警察紀念碑上。`;
+      }
+    }
+
+    s.age += stage.ageJump;
+    s.year = 2026 + (s.age - 18);
+    pushLog(`【${stage.label}】${choice.label}。${resultText}`, false);
+
+    const deltaAll = mergeDeltas(applied, extraApplied);
+
+    screen.innerHTML = `
+      <div class="resolve-wrap">
+        ${stampHTML}
+        <div class="log-entry">${resultText}</div>
+        ${deltaRowHTML(deltaAll, choice.salary)}
+        <button class="btn-primary" id="continueBtn">繼續 ▸</button>
+      </div>
+      ${careerLogHTML()}
+    `;
+    renderStatus();
+    document.getElementById('continueBtn').addEventListener('click', ()=>{
+      if (s.flags.duty_death){
+        screenEnding();
+        return;
+      }
+      s.stageIndex++;
+      if (s.stageIndex >= STAGES.length){
+        screenRetire();
+      } else {
+        screenStage();
+      }
+    });
+  }
+
+  function clamp01(v){ return Math.max(0.05, Math.min(0.95, v)); }
+  function mergeDeltas(a,b){
+    const out = Object.assign({}, a);
+    Object.keys(b||{}).forEach(k=> out[k] = (out[k]||0) + b[k]);
+    return out;
+  }
+  function deltaRowHTML(deltas, salary){
+    const chips = Object.keys(deltas).filter(k=>deltas[k]!==0).map(k=>{
+      const v = deltas[k];
+      return `<span class="delta ${v>0?'pos':'neg'}">${k} ${v>0?'+':''}${v}</span>`;
+    });
+    if (salary) chips.push(`<span class="delta pos">薪資 +${salary}萬</span>`);
+    if (!chips.length) return '';
+    return `<div class="delta-row">${chips.join('')}</div>`;
+  }
+
+  function screenRetire(){
+    renderStatus();
+    screen.innerHTML = `
+      <div class="stageprog mono">
+        <span>第 ${STAGES.length+1} / ${STAGES.length+1} 階段</span>
+        <span>CASE 09 · 退休抉擇</span>
+      </div>
+      <div class="file-card">
+        <div class="file-num mono">FILE No. ${state.fileNumber}-F ／ 退休抉擇</div>
+        <div class="file-title">退休抉擇</div>
+        <div class="file-body">你已符合申請退休的資格。是要見好就收、含飴弄孫，還是拚到屆齡最後一刻，力求生涯最高峰？</div>
+      </div>
+      <div class="choices" id="choiceWrap"></div>
+      ${careerLogHTML()}
+    `;
+    const wrap = document.getElementById('choiceWrap');
+    RETIRE_CHOICES.forEach(c=>{
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerHTML = `${c.label}${c.note?`<span class="note">${c.note}</span>`:''}`;
+      btn.addEventListener('click', ()=> resolveRetire(c));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function resolveRetire(choice){
+    const s = state;
+    const applied = applyEffects(s, choice.effects);
+    s.salary += (choice.salary||0);
+    let resultText = '';
+    if (choice.key==='push'){
+      const chance = clamp01((overall(s)*0.6 + s.stats.人脈*0.4)/99 + (choice.bonus||0));
+      if (s.rng() < chance && s.rankIdx < RANKS.length-1){
+        s.rankIdx += 1;
+        resultText = `拚到最後一刻，你在退休前意外獲得最後一次拔擢，以「${rankName(s)}」身分卸下警徽。`;
+      } else {
+        resultText = `你在崗位上撐到了屆齡的最後一天，階級停在「${rankName(s)}」，但沒有人能說你不夠拚。`;
+      }
+    } else if (choice.key==='advise'){
+      resultText = `你婉拒了退休，接受借調成為顧問，繼續在會議室裡發揮多年辦案經驗。`;
+    } else {
+      resultText = `你在核准的第一天就送出退休申請，準備把時間留給家人與自己。`;
+    }
+    s.age += 8;
+    s.year = 2026 + (s.age-18);
+    pushLog(`【退休抉擇】${choice.label}。${resultText}`, false);
+
+    screen.innerHTML = `
+      <div class="resolve-wrap">
+        <div class="stamp gold">生涯 · 完結</div>
+        <div class="log-entry">${resultText}</div>
+        ${deltaRowHTML(applied, choice.salary)}
+        <button class="btn-primary" id="continueBtn">查看生涯總評 ▸</button>
+      </div>
+    `;
+    document.getElementById('continueBtn').addEventListener('click', screenEnding);
+  }
+
+  /* ================= ENDING ================= */
+  function computeEnding(s){
+    const ov = overall(s);
+    const integ = s.stats.操守;
+    if (s.flags.duty_death){
+      return {
+        icon:'🎖️', title:'英勇殉職',
+        sub:`追晉一階 · ${rankName(s)}`,
+        body:`${s.name}在執勤中殉職，享年${s.age}歲。警察節的追思名單上，多了一個被永遠記住的名字。同袍在紀念碑前立正敬禮，家屬領取撫卹金與國家榮耀，但誰都寧願這份榮耀從未發生過。`
+      };
+    }
+    if (integ <= 25 && (s.flags.corrupt || s.flags.corrupt2)){
+      return {
+        icon:'⚠️', title:'貪瀆去職',
+        sub:`除警籍 · 末代階級 ${rankName(s)}`,
+        body:`廉政署的調查小組在一次金流稽核中盯上了${s.name}。收賄的證據一項項浮出水面，最終被依貪污治罪條例起訴、除籍收押。年輕時穿上制服的驕傲，換來的是新聞跑馬燈上一閃而過的名字。`
+      };
+    }
+    if (integ >= 75 && ov >= 70 && s.rankIdx >= 5){
+      return {
+        icon:'🏅', title:'警界名人堂',
+        sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+        body:`${s.name}以清廉與實力走完整段警察生涯，退休典禮上擠滿了同袍與受過你幫助的市民。地方警友會將你的辦案故事寫進教材，後進口中「傳說中的前輩」，說的就是你。`
+      };
+    }
+    if (integ >= 55 && ov >= 55){
+      return {
+        icon:'🏆', title:'模範警察退休',
+        sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+        body:`${s.name}在崗位上兢兢業業${s.age-18}年，沒有轟轟烈烈的傳奇，卻在每一個平凡的勤務裡守住了分寸。退休茶會上，分局長親自頒發服務獎章，感謝你這些年的堅持。`
+      };
+    }
+    if (s.rankIdx <= 1){
+      return {
+        icon:'🚓', title:'基層老兵退休',
+        sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+        body:`${s.name}一輩子沒離開過第一線，官階始終沒往上爬，但轄區裡的居民都認得你的臉。退休那天，巷口的早餐店老闆特地包了一份油飯，說「這條街少了你巡邏，會不習慣」。`
+      };
+    }
+    return {
+      icon:'📁', title:'平凡卸下警徽',
+      sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+      body:`${s.name}的警察生涯沒有大起，也沒有大落。功過相抵的考績表裡，寫著一個普通人如何在制度與人情之間，勉強維持住自己的樣子。`
+    };
+  }
+
+  function screenEnding(){
+    statusbar.classList.remove('show');
+    const s = state;
+    const end = computeEnding(s);
+    screen.innerHTML = `
+      <div class="end-badge">
+        <div class="rank-final">${end.icon}</div>
+        <h2>${end.title}</h2>
+        <div class="sub mono">${end.sub}</div>
+      </div>
+      <div class="end-body">${end.body}</div>
+      <div class="final-stats">
+        <div class="fs-item"><div class="n">${s.age}</div><div class="l">退役年齡</div></div>
+        <div class="fs-item"><div class="n">${overall(s)}</div><div class="l">綜合評價</div></div>
+        <div class="fs-item"><div class="n">${s.stats.操守}</div><div class="l">操守指數</div></div>
+        <div class="fs-item"><div class="n">${s.salary}萬</div><div class="l">生涯薪資</div></div>
+      </div>
+      ${careerLogHTML()}
+      <div class="seedrow">
+        <span class="mono" id="seedDisplay2">種子碼：${s.seed}</span>
+        <button class="iconbtn" id="copySeed">複製</button>
+      </div>
+      <button class="btn-primary" id="restartBtn">再模擬一次</button>
+    `;
+    document.getElementById('copySeed').addEventListener('click', ()=>{
+      if (navigator.clipboard) navigator.clipboard.writeText(s.seed);
+    });
+    document.getElementById('restartBtn').addEventListener('click', ()=>{
+      state = null;
+      screenStart();
+    });
+  }
+
+  screenStart();
+})();
+</script>
+</body>
+</html>
