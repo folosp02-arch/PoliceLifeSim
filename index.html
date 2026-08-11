@@ -8,493 +8,107 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0c0f14;
-    --bg2:#12161d;
-    --line:#242b35;
-    --paper:#e9e0c7;
-    --paper-ink:#2a2418;
-    --paper-line:#c9bd9a;
-    --yellow:#f2b705;
-    --blue:#3f7ea6;
-    --red:#b3392f;
-    --text:#e7e9ec;
-    --text-dim:#8892a0;
-    --text-dim2:#5c6472;
-    --radius:2px;
+    --bg:#0c0f14; --bg2:#12161d; --line:#242b35;
+    --paper:#e9e0c7; --paper-ink:#2a2418;
+    --yellow:#f2b705; --blue:#3f7ea6; --red:#b3392f; --pink:#c9789a;
+    --text:#e7e9ec; --text-dim:#8892a0; --text-dim2:#5c6472; --radius:2px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:
-      radial-gradient(ellipse 900px 500px at 15% -10%, #16202a 0%, transparent 60%),
-      var(--bg);
-    color:var(--text);
-    font-family:'Noto Sans TC',sans-serif;
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
+    background:radial-gradient(ellipse 900px 500px at 15% -10%, #16202a 0%, transparent 60%),var(--bg);
+    color:var(--text); font-family:'Noto Sans TC',sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased;
   }
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
-  }
-
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;} }
   .mono{font-family:'IBM Plex Mono',monospace;}
-
   .app{
-    max-width:560px;
-    margin:0 auto;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    border-left:1px solid var(--line);
-    border-right:1px solid var(--line);
-    background:
-      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
-      var(--bg2);
+    max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;
+    border-left:1px solid var(--line);border-right:1px solid var(--line);
+    background:repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),var(--bg2);
   }
-
-  /* ---------- shell header ---------- */
-  .shell-head{
-    padding:14px 18px 12px;
-    border-bottom:1px solid var(--line);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:var(--bg);
-  }
-  .shell-head .tag{
-    font-size:11px;
-    letter-spacing:.14em;
-    color:var(--text-dim2);
-  }
-  .shell-head .badge{
-    width:26px;height:26px;
-    border:1.5px solid var(--yellow);
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:12px;
-    color:var(--yellow);
-    flex-shrink:0;
-  }
-
-  /* ---------- status bar (in-game) ---------- */
-  .statusbar{
-    padding:10px 18px;
-    background:var(--bg);
-    border-bottom:1px solid var(--line);
-    display:none;
-  }
+  .shell-head{padding:14px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--bg);}
+  .shell-head .tag{font-size:11px;letter-spacing:.14em;color:var(--text-dim2);}
+  .shell-head .badge{width:26px;height:26px;border:1.5px solid var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--yellow);flex-shrink:0;}
+  .statusbar{padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--line);display:none;}
   .statusbar.show{display:block;}
-  .statusbar .row1{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    margin-bottom:8px;
-  }
-  .statusbar .rank{
-    font-weight:900;
-    font-size:15px;
-    letter-spacing:.02em;
-  }
-  .statusbar .meta{
-    font-size:11.5px;
-    color:var(--text-dim);
-  }
-  .statbars{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
-  }
-  .statitem .lbl{
-    font-size:10px;
-    color:var(--text-dim2);
-    display:flex;justify-content:space-between;
-    margin-bottom:3px;
-  }
+  .statusbar .row1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .statusbar .rank{font-weight:900;font-size:15px;letter-spacing:.02em;}
+  .statusbar .meta{font-size:11.5px;color:var(--text-dim);}
+  .statbars{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .statitem .lbl{font-size:10px;color:var(--text-dim2);display:flex;justify-content:space-between;margin-bottom:3px;}
   .statitem .lbl b{color:var(--text-dim);font-weight:500;}
-  .statitem .track{
-    height:4px;
-    background:#1c2129;
-    border-radius:2px;
-    overflow:hidden;
-  }
-  .statitem .fill{
-    height:100%;
-    border-radius:2px;
-  }
-  .fill.body{background:var(--yellow);}
-  .fill.inv{background:var(--blue);}
-  .fill.rel{background:#7fa06f;}
-  .fill.int{background:#c98fd6;}
-
-  /* ---------- main ---------- */
-  main{
-    flex:1;
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-  }
-
-  /* ---------- start screen hero ---------- */
-  .hero-eyebrow{
-    font-size:11px;
-    color:var(--yellow);
-    letter-spacing:.16em;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .hero-eyebrow::before{
-    content:"";
-    width:18px;height:1px;
-    background:var(--yellow);
-  }
-  h1.title{
-    font-size:30px;
-    font-weight:900;
-    line-height:1.15;
-    margin:6px 0 4px;
-    letter-spacing:.01em;
-  }
-  h1.title em{
-    display:block;
-    font-style:normal;
-    font-size:14px;
-    font-weight:500;
-    color:var(--text-dim);
-    margin-top:6px;
-    letter-spacing:.03em;
-  }
-  .tagline{
-    font-size:13.5px;
-    line-height:1.75;
-    color:var(--text-dim);
-    border-left:2px solid var(--blue);
-    padding-left:12px;
-  }
-
-  /* ---------- form card ---------- */
-  .card{
-    background:var(--bg);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:16px;
-  }
-  .field{margin-bottom:16px;}
-  .field:last-child{margin-bottom:0;}
-  .field label{
-    display:block;
-    font-size:11px;
-    color:var(--text-dim2);
-    letter-spacing:.08em;
-    margin-bottom:8px;
-  }
-  .field input[type=text]{
-    width:100%;
-    background:var(--bg2);
-    border:1px solid var(--line);
-    color:var(--text);
-    padding:10px 12px;
-    font-size:14px;
-    font-family:'Noto Sans TC',sans-serif;
-    border-radius:var(--radius);
-  }
+  .statitem .track{height:4px;background:#1c2129;border-radius:2px;overflow:hidden;}
+  .statitem .fill{height:100%;border-radius:2px;}
+  .fill.body{background:var(--yellow);} .fill.inv{background:var(--blue);} .fill.rel{background:#7fa06f;} .fill.int{background:#c98fd6;}
+  .relline{margin-top:8px;font-size:11px;color:var(--pink);display:flex;align-items:center;gap:5px;}
+  main{flex:1;padding:18px;display:flex;flex-direction:column;gap:16px;}
+  .hero-eyebrow{font-size:11px;color:var(--yellow);letter-spacing:.16em;display:flex;align-items:center;gap:8px;}
+  .hero-eyebrow::before{content:"";width:18px;height:1px;background:var(--yellow);}
+  h1.title{font-size:30px;font-weight:900;line-height:1.15;margin:6px 0 4px;letter-spacing:.01em;}
+  h1.title em{display:block;font-style:normal;font-size:14px;font-weight:500;color:var(--text-dim);margin-top:6px;letter-spacing:.03em;}
+  .tagline{font-size:13.5px;line-height:1.75;color:var(--text-dim);border-left:2px solid var(--blue);padding-left:12px;}
+  .card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:16px;}
+  .field{margin-bottom:16px;} .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:11px;color:var(--text-dim2);letter-spacing:.08em;margin-bottom:8px;}
+  .field input[type=text]{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:10px 12px;font-size:14px;font-family:'Noto Sans TC',sans-serif;border-radius:var(--radius);}
   .field input[type=text]:focus{outline:2px solid var(--blue);outline-offset:1px;}
-
-  .track-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-  .track-opt{
-    border:1px solid var(--line);
-    background:var(--bg2);
-    padding:10px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    text-align:left;
-  }
-  .track-opt .icon{font-size:18px;}
-  .track-opt .name{font-size:13px;font-weight:700;margin:5px 0 3px;}
-  .track-opt .desc{font-size:11px;color:var(--text-dim);line-height:1.4;}
+  .track-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .track-opt{border:1px solid var(--line);background:var(--bg2);padding:10px;border-radius:var(--radius);cursor:pointer;text-align:left;}
+  .track-opt .icon{font-size:18px;} .track-opt .name{font-size:13px;font-weight:700;margin:5px 0 3px;} .track-opt .desc{font-size:11px;color:var(--text-dim);line-height:1.4;}
   .track-opt.sel{border-color:var(--yellow);background:#1a1710;}
   .track-opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
-
-  .seedrow{
-    display:flex;
-    gap:8px;
-    align-items:center;
-  }
-  .seedrow .mono{
-    flex:1;
-    font-size:12.5px;
-    color:var(--text-dim);
-    background:var(--bg2);
-    border:1px solid var(--line);
-    padding:9px 10px;
-    border-radius:var(--radius);
-    overflow-x:auto;
-    white-space:nowrap;
-  }
-  .iconbtn{
-    background:var(--bg2);
-    border:1px solid var(--line);
-    color:var(--text-dim);
-    padding:9px 11px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    font-size:13px;
-    flex-shrink:0;
-  }
+  .seedrow{display:flex;gap:8px;align-items:center;}
+  .seedrow .mono{flex:1;font-size:12.5px;color:var(--text-dim);background:var(--bg2);border:1px solid var(--line);padding:9px 10px;border-radius:var(--radius);overflow-x:auto;white-space:nowrap;}
+  .iconbtn{background:var(--bg2);border:1px solid var(--line);color:var(--text-dim);padding:9px 11px;border-radius:var(--radius);cursor:pointer;font-size:13px;flex-shrink:0;}
   .iconbtn:hover{border-color:var(--blue);color:var(--text);}
   .seedhint{font-size:10.5px;color:var(--text-dim2);margin-top:7px;line-height:1.5;}
-
-  .btn-primary{
-    width:100%;
-    background:var(--yellow);
-    color:#1a1400;
-    border:none;
-    font-weight:700;
-    font-size:15px;
-    padding:14px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    letter-spacing:.02em;
-    font-family:'Noto Sans TC',sans-serif;
-  }
+  .btn-primary{width:100%;background:var(--yellow);color:#1a1400;border:none;font-weight:700;font-size:15px;padding:14px;border-radius:var(--radius);cursor:pointer;letter-spacing:.02em;font-family:'Noto Sans TC',sans-serif;}
   .btn-primary:hover{filter:brightness(1.08);}
-  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
-  .btn-secondary{
-    width:100%;
-    background:transparent;
-    color:var(--text-dim);
-    border:1px solid var(--line);
-    font-size:13px;
-    padding:11px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    font-family:'Noto Sans TC',sans-serif;
-  }
-  .btn-secondary:hover{border-color:var(--text-dim);color:var(--text);}
-
-  .disclaimer{
-    font-size:10.5px;
-    color:var(--text-dim2);
-    line-height:1.6;
-    text-align:center;
-    padding-top:4px;
-  }
-
-  /* ---------- stage / case-file card (paper) ---------- */
-  .stageprog{
-    font-size:10.5px;
-    color:var(--text-dim2);
-    letter-spacing:.1em;
-    display:flex;
-    justify-content:space-between;
-  }
-  .file-card{
-    background:var(--paper);
-    color:var(--paper-ink);
-    border-radius:var(--radius);
-    padding:18px 18px 16px;
-    position:relative;
-    box-shadow:0 8px 22px -10px rgba(0,0,0,.55);
-    background-image:
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0px, transparent 1px, transparent 26px, rgba(0,0,0,0.025) 27px);
-  }
-  .file-card::before{
-    content:"檔案";
-    position:absolute;
-    top:-9px; left:16px;
-    background:var(--red);
-    color:#fff;
-    font-size:10px;
-    padding:2px 8px;
-    letter-spacing:.1em;
-    font-family:'IBM Plex Mono',monospace;
-  }
-  .file-num{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:10.5px;
-    color:#6b6144;
-    margin-bottom:8px;
-    letter-spacing:.03em;
-  }
-  .file-title{
-    font-size:17px;
-    font-weight:900;
-    margin-bottom:10px;
-    letter-spacing:.01em;
-  }
-  .file-body{
-    font-size:13.5px;
-    line-height:1.85;
-  }
-
-  .choices{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .choice-btn{
-    text-align:left;
-    background:var(--bg);
-    border:1px solid var(--line);
-    color:var(--text);
-    padding:12px 14px;
-    border-radius:var(--radius);
-    cursor:pointer;
-    font-family:'Noto Sans TC',sans-serif;
-    font-size:13.5px;
-    line-height:1.5;
-  }
+  .disclaimer{font-size:10.5px;color:var(--text-dim2);line-height:1.6;text-align:center;padding-top:4px;}
+  .stageprog{font-size:10.5px;color:var(--text-dim2);letter-spacing:.1em;display:flex;justify-content:space-between;}
+  .file-card{background:var(--paper);color:var(--paper-ink);border-radius:var(--radius);padding:18px 18px 16px;position:relative;box-shadow:0 8px 22px -10px rgba(0,0,0,.55);
+    background-image:repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0px, transparent 1px, transparent 26px, rgba(0,0,0,0.025) 27px);}
+  .file-card::before{content:"檔案";position:absolute;top:-9px;left:16px;background:var(--red);color:#fff;font-size:10px;padding:2px 8px;letter-spacing:.1em;font-family:'IBM Plex Mono',monospace;}
+  .file-card.romance::before{content:"私人";background:var(--pink);}
+  .file-num{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6b6144;margin-bottom:8px;letter-spacing:.03em;}
+  .file-title{font-size:17px;font-weight:900;margin-bottom:10px;letter-spacing:.01em;}
+  .file-body{font-size:13.5px;line-height:1.85;}
+  .choices{display:flex;flex-direction:column;gap:8px;}
+  .choice-btn{text-align:left;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px 14px;border-radius:var(--radius);cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:13.5px;line-height:1.5;}
   .choice-btn:hover{border-color:var(--yellow);background:#1a1710;}
   .choice-btn:focus-visible{outline:2px solid var(--blue);outline-offset:1px;}
-  .choice-btn .note{
-    display:block;
-    font-size:11px;
-    color:var(--text-dim2);
-    margin-top:4px;
-  }
-
-  /* ---------- resolution / stamp ---------- */
-  .resolve-wrap{
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
-  .stamp{
-    align-self:center;
-    border:3px solid var(--blue);
-    color:var(--blue);
-    font-family:'IBM Plex Mono',monospace;
-    font-weight:600;
-    font-size:15px;
-    letter-spacing:.12em;
-    padding:8px 20px;
-    border-radius:6px;
-    transform:rotate(-7deg) scale(0.6);
-    opacity:0;
-    animation:stampin .38s cubic-bezier(.2,1.6,.4,1) forwards;
-    animation-delay:.08s;
-  }
-  .stamp.bad{border-color:var(--red);color:var(--red);}
-  .stamp.gold{border-color:var(--yellow);color:var(--yellow);}
-  @keyframes stampin{
-    0%{opacity:0;transform:rotate(-7deg) scale(0.5);}
-    60%{opacity:1;transform:rotate(-7deg) scale(1.08);}
-    100%{opacity:1;transform:rotate(-7deg) scale(1);}
-  }
-  .log-entry{
-    font-size:13px;
-    line-height:1.75;
-    color:var(--text-dim);
-    background:var(--bg);
-    border:1px solid var(--line);
-    border-left:2px solid var(--blue);
-    padding:11px 13px;
-    border-radius:var(--radius);
-  }
-  .delta-row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11.5px;
-  }
-  .delta{
-    padding:3px 8px;
-    border-radius:20px;
-    border:1px solid var(--line);
-    color:var(--text-dim);
-  }
-  .delta.pos{color:#8fd68f;border-color:#2d4a2d;}
-  .delta.neg{color:#e39a92;border-color:#4a2d2d;}
-
-  /* ---------- career log ---------- */
-  .careerlog{
-    display:flex;
-    flex-direction:column;
-    gap:0;
-  }
-  .careerlog summary{
-    font-size:11px;
-    color:var(--text-dim2);
-    letter-spacing:.1em;
-    cursor:pointer;
-    padding:6px 0;
-  }
-  .careerlog .items{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    max-height:180px;
-    overflow-y:auto;
-    padding:8px 0 2px;
-  }
-  .careerlog .item{
-    font-size:11.5px;
-    color:var(--text-dim2);
-    line-height:1.6;
-    border-bottom:1px dashed var(--line);
-    padding-bottom:6px;
-  }
+  .choice-btn .note{display:block;font-size:11px;color:var(--text-dim2);margin-top:4px;}
+  .resolve-wrap{position:relative;display:flex;flex-direction:column;gap:14px;}
+  .stamp{align-self:center;border:3px solid var(--blue);color:var(--blue);font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;letter-spacing:.12em;padding:8px 20px;border-radius:6px;
+    transform:rotate(-7deg) scale(0.6);opacity:0;animation:stampin .38s cubic-bezier(.2,1.6,.4,1) forwards;animation-delay:.08s;}
+  .stamp.bad{border-color:var(--red);color:var(--red);} .stamp.gold{border-color:var(--yellow);color:var(--yellow);} .stamp.pink{border-color:var(--pink);color:var(--pink);}
+  @keyframes stampin{0%{opacity:0;transform:rotate(-7deg) scale(0.5);}60%{opacity:1;transform:rotate(-7deg) scale(1.08);}100%{opacity:1;transform:rotate(-7deg) scale(1);}}
+  .log-entry{font-size:13px;line-height:1.75;color:var(--text-dim);background:var(--bg);border:1px solid var(--line);border-left:2px solid var(--blue);padding:11px 13px;border-radius:var(--radius);}
+  .log-entry.romance{border-left-color:var(--pink);}
+  .tierline{font-size:11px;letter-spacing:.06em;text-align:center;font-family:'IBM Plex Mono',monospace;}
+  .tierline.great{color:#8fd68f;} .tierline.bad{color:#e39a92;} .tierline.normal{color:var(--text-dim2);}
+  .delta-row{display:flex;gap:10px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11.5px;}
+  .delta{padding:3px 8px;border-radius:20px;border:1px solid var(--line);color:var(--text-dim);}
+  .delta.pos{color:#8fd68f;border-color:#2d4a2d;} .delta.neg{color:#e39a92;border-color:#4a2d2d;}
+  .careerlog summary{font-size:11px;color:var(--text-dim2);letter-spacing:.1em;cursor:pointer;padding:6px 0;}
+  .careerlog .items{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding:8px 0 2px;}
+  .careerlog .item{font-size:11.5px;color:var(--text-dim2);line-height:1.6;border-bottom:1px dashed var(--line);padding-bottom:6px;}
   .careerlog .item b{color:var(--text-dim);font-weight:500;}
-
-  /* ---------- ending ---------- */
-  .end-badge{
-    text-align:center;
-    padding:22px 14px 18px;
-  }
-  .end-badge .rank-final{
-    width:64px;height:64px;
-    margin:0 auto 12px;
-    border:2px solid var(--yellow);
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:26px;
-  }
-  .end-badge h2{
-    font-size:22px;
-    font-weight:900;
-    margin:0 0 6px;
-  }
-  .end-badge .sub{
-    font-size:12px;
-    color:var(--text-dim);
-    font-family:'IBM Plex Mono',monospace;
-  }
-  .end-body{
-    font-size:13.5px;
-    line-height:1.85;
-    color:var(--text-dim);
-  }
-  .final-stats{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
-  }
-  .fs-item{
-    background:var(--bg);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    padding:10px 12px;
-  }
+  .end-badge{text-align:center;padding:22px 14px 18px;}
+  .end-badge .rank-final{width:64px;height:64px;margin:0 auto 12px;border:2px solid var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .end-badge h2{font-size:22px;font-weight:900;margin:0 0 6px;}
+  .end-badge .sub{font-size:12px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;}
+  .end-body{font-size:13.5px;line-height:1.85;color:var(--text-dim);}
+  .final-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  .fs-item{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;}
   .fs-item .n{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;}
   .fs-item .l{font-size:10.5px;color:var(--text-dim2);margin-top:2px;}
-
-  ::-webkit-scrollbar{width:6px;height:6px;}
-  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="shell-head">
-    <span class="tag mono">POLICE LIFE · 警察人生模擬程式</span>
-    <div class="badge">警</div>
-  </div>
+  <div class="shell-head"><span class="tag mono">POLICE LIFE · 警察人生模擬程式</span><div class="badge">警</div></div>
   <div class="statusbar" id="statusbar"></div>
   <main id="screen"></main>
 </div>
@@ -518,15 +132,72 @@
     };
   }
   const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  function genSeed(len){
-    len = len || 8;
-    let s = "";
-    for (let i=0;i<len;i++) s += ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
-    return s;
+  function genSeed(len){ len=len||8; let s=""; for(let i=0;i<len;i++) s+=ALPHABET[Math.floor(Math.random()*ALPHABET.length)]; return s; }
+  function clamp(v){ return Math.max(0, Math.min(99, Math.round(v))); }
+  function clamp01(v){ return Math.max(0.05, Math.min(0.95, v)); }
+
+  /* ================= OUTCOME VARIANCE SYSTEM ================= */
+  /* Every non-milestone choice rolls a tier so identical choices can still play out differently. */
+  function rollOutcome(rng){
+    const r = rng();
+    if (r<0.15) return {tier:'great', mult:1.5};
+    if (r<0.65) return {tier:'normal', mult:1.0};
+    if (r<0.90) return {tier:'minor', mult:0.55};
+    return {tier:'bad', mult:-0.35};
+  }
+  function scaleEffects(effects, mult){
+    const out = {};
+    Object.keys(effects||{}).forEach(k=>{ out[k] = Math.round(effects[k]*mult); });
+    return out;
+  }
+  const OUTCOME_LINES = {
+    academy:{
+      great:['教官當眾稱讚你的表現，同期都對你另眼相看。','這次的努力超出預期，讓你信心大增。'],
+      normal:['一切照計畫進行，沒有太多意外。','日子按表操課地過去了。'],
+      minor:['過程有點手忙腳亂，效果打了折扣。','比預期累了不少，成效普普。'],
+      bad:['一個不小心捅了小婁子，被學長電了一頓。','熬夜的代價，隔天精神很差，表現失常。'],
+    },
+    duty:{
+      great:['處理得漂亮，主管當場記了一支嘉獎。','意外立了功，同事都對你刮目相看。'],
+      normal:['事情照著你的判斷落幕，沒有太多意外。','過程雖然瑣碎，但總算順利收尾。'],
+      minor:['過程有點手忙腳亂，還好沒釀成大錯。','效果比預期打了折扣。'],
+      bad:['計畫不如預期，你被上級唸了一頓。','出了點小差錯，讓你灰頭土臉，還得寫報告。'],
+    },
+    senior:{
+      great:['薑是老的辣，你的經驗這次派上大用場。','老將出馬，表現讓年輕人心服口服。'],
+      normal:['一切按部就班，沒有太多波瀾。','平順地過了這一關。'],
+      minor:['體力終究不比從前，這次做得有點吃力。','比想像中費勁，回家累得倒頭就睡。'],
+      bad:['年紀真的不饒人，這次栽了個小跟頭。','舊傷隱隱作痛，提醒你已經不是當年的自己。'],
+    },
+    romance:{
+      great:['這件事讓兩人的感情更上一層樓。','對方看見了你難得的用心，格外感動。'],
+      normal:['日子照舊，感情維持在一個平穩的狀態。','沒有太大起伏，就是平淡的相處日常。'],
+      minor:['小小的誤會讓氣氛有點尷尬。','溝通不太順暢，留下一點小疙瘩。'],
+      bad:['一句話說得不夠好，讓對方真的動氣了。','這件事，成了往後偶爾被翻出來的舊帳。'],
+    },
+  };
+  function pickLine(category, tier, rng){
+    const arr = OUTCOME_LINES[category][tier];
+    return arr[Math.floor(rng()*arr.length)];
+  }
+  const TIER_LABEL = {great:'順利 · 超乎預期', normal:'', minor:'', bad:'不順 · 出了狀況'};
+
+  const MILESTONE_VARIANT_LINES = {
+    grad:{great:'新單位對你的第一印象很好，主管特別交辦重要任務給你磨練。', normal:'報到後一切照表操課，日子按部就班地展開。', bad:'磨合期不太順利，你被貼了「菜鳥」標籤好一陣子。'},
+    case1:{great:'案件落幕後，你的處理方式在同儕間傳開，風評不錯。', normal:'案子結了，日子照舊，沒有太多漣漪。', bad:'消息不知怎麼走漏，讓你在分局裡多了些流言蜚語。'},
+    midlife:{great:'這件事你處理得漂亮，連督察都私下稱讚你的判斷。', normal:'事情這樣過去了，生活恢復平靜。', bad:'這件事在分局裡傳開，你發現自己被有些人另眼相待。'},
+  };
+  function rollMilestoneVariant(rng){
+    const r = rng();
+    if (r<0.25) return 'great';
+    if (r<0.8) return 'normal';
+    return 'bad';
   }
 
   /* ================= DATA ================= */
   const RANKS = ['警專學生','警員','資深警員','巡佐','巡官','警正','分局長','警察局長'];
+  const RETIRE_AGE = 55;
+  const PARTNER_NAMES = ['雨柔','家豪','怡君','冠宇','思穎','建宏','佳玲','俊傑','詩涵','柏翰','宜蓁','彥廷'];
 
   const TRACKS = [
     {id:'detective', name:'刑事鑑識組', icon:'🔍', desc:'追查真相，靠腦不靠拳頭。', bonus:{偵查:12}},
@@ -535,126 +206,246 @@
     {id:'security',  name:'保安維安組', icon:'🛡️', desc:'鎮暴維安第一線，紀律至上。', bonus:{體能:8,操守:4}},
   ];
 
-  const STAGES = [
-    {
-      id:'academy1', label:'警專新生', ageJump:0,
-      fileNo:'CASE 01 · 養成教育',
-      intro: s => `你剛踏入警察專科學校的大門，教官的口令聲迴盪在操場上。三年的養成教育，將決定你未來能走多遠。`,
+  const ACADEMY_POOL = [
+    {id:'a1', title:'入學適應', text:s=>'凌晨五點的哨音劃破宿舍，教官的口令聲迴盪在操場上。你該把時間投資在哪裡？',
       choices:[
-        {label:'凌晨五點跟著學長跑操場', effects:{體能:7,操守:1}, salary:5},
+        {label:'凌晨加練體能', effects:{體能:7,操守:1}, salary:5},
         {label:'把行政法典啃到滾瓜爛熟', effects:{偵查:6,操守:2}, salary:5},
         {label:'混熟班上每個同學的背景', effects:{人脈:7,操守:-1}, salary:5},
-      ],
-      events:[
-        {text:'體能測驗差點被刷掉，你咬牙補考才過關。', effects:{體能:-2}},
-        {text:'小考意外拿下班排第一，教官記住了你的名字。', effects:{偵查:3}},
-        {text:'幫同學代寫報告被抓到，記了一支申誡。', effects:{操守:-3}},
-        {text:'新生訓練平安落幕，日子過得很規律。', effects:{}},
-      ],
-    },
-    {
-      id:'academy2', label:'畢業分發', ageJump:2,
-      fileNo:'CASE 02 · 分發志願',
-      intro: s => `畢業在即，${s.name}，你必須決定第一份工作要去哪裡——這個選擇會形塑你未來十年的路。`,
+      ]},
+    {id:'a2', title:'班代改選', text:s=>'班上要選一位班代負責跟教官溝通，同學們的眼光落在你身上。',
       choices:[
-        {label:'申請直轄市大型分局', note:'案量大、升遷快，但競爭激烈', effects:{人脈:5,體能:2}, salary:80},
-        {label:'申請偏鄉派出所', note:'磨基本功，人情味重', effects:{偵查:3,操守:5}, salary:50},
-        {label:'考特考轉刑事鑑識線', note:'專業掛帥，起步較辛苦', effects:{偵查:9,操守:-1}, salary:70},
-      ],
-      events:[
-        {text:'分發放榜當天，同梯戲稱你是「幸運兒」。', effects:{}},
-        {text:'報到第一天就遇上鬧場民眾，菜鳥的震撼教育。', effects:{體能:2}},
-        {text:'學長私下提醒你分局裡的眉眉角角。', effects:{人脈:3}},
-        {text:'報到手續出了包，被主管唸了一頓。', effects:{操守:-2}},
-      ],
-    },
-    {
-      id:'patrol1', label:'基層歷練', ageJump:3,
-      fileNo:'CASE 03 · 勤務日常',
-      intro: s => `每天的勤務表排得滿滿：臨檢、家暴通報、酒駕攔查、街頭調解……你開始真正理解這份工作的重量。`,
+        {label:'接下班代，扛起責任', effects:{人脈:5,操守:3,體能:-1}, salary:5},
+        {label:'推薦別人，自己專心讀書', effects:{偵查:3}, salary:0},
+        {label:'半推半就當了副班代', effects:{人脈:2}, salary:0},
+      ]},
+    {id:'a3', title:'宿舍夜衝', text:s=>'室友揪你半夜翻牆出去買鹹酥雞，被抓到肯定會記過。',
       choices:[
-        {label:'認真寫好每一份筆錄', effects:{偵查:5,操守:3}, salary:30},
-        {label:'跟轄區里長搏感情、博聲量', effects:{人脈:6}, salary:30},
-        {label:'能拖就拖，準時下班最重要', effects:{體能:4,操守:-2}, salary:30},
-      ],
-      events:[
-        {text:'深夜攔查一輛超速機車，意外查獲通緝犯，記了一支嘉獎。', effects:{偵查:3}},
-        {text:'處理家暴案時被潑了一身酒，回家換了三次衣服。', effects:{體能:-3}},
-        {text:'轄區里長送來一箱水果，說是感謝你巡邏勤快。', effects:{人脈:2}},
-        {text:'值班打瞌睡被督察抓到，被要求寫自白書。', effects:{操守:-4}},
-      ],
-    },
-    {
-      id:'exam1', label:'升遷考試・巡佐', ageJump:3, exam:true, rankTarget:3,
-      fileNo:'CASE 04 · 資格考核',
-      intro: s => `巡佐考試在即。你可以拚死拚活準備筆試，也可以靠年資與人脈慢慢熬——這是體力與時間的第一場豪賭。`,
+        {label:'豁出去，跟大家一起去', effects:{人脈:4,操守:-3}, salary:0},
+        {label:'勸大家別冒險，自己留下讀書', effects:{操守:3,人脈:-2}, salary:0},
+        {label:'裝睡，假裝什麼都不知道', effects:{}, salary:0},
+      ]},
+    {id:'a4', title:'術科考核', text:s=>'射擊與逮捕術的期中考核在即，教官說這是當警察的基本功。',
       choices:[
-        {label:'請假閉關苦讀三個月', effects:{偵查:6,體能:-3}, bonus:0.18, salary:20},
-        {label:'邊上班邊準備，穩紮穩打', effects:{偵查:4,人脈:2}, bonus:0.10, salary:20},
-        {label:'靠年資排隊，佛系應考', effects:{操守:2,體能:2}, bonus:0.0, salary:10},
-      ],
-    },
-    {
-      id:'case1', label:'重大專案・毒品查緝', ageJump:4,
-      fileNo:'CASE 05 · 專案偵辦',
-      intro: s => `分局接獲線報，你被編入緝毒專案小組，追查一條運毒管道。指揮官暗示：睜一隻眼閉一隻眼，紅包少不了你的份。`,
+        {label:'苦練射擊，槍法要準', effects:{偵查:5,體能:-1}, salary:5},
+        {label:'苦練逮捕術，體能要夠', effects:{體能:6}, salary:5},
+        {label:'兩邊都馬虎應付', effects:{體能:-2,偵查:-2}, salary:0},
+      ]},
+    {id:'a5', title:'警專運動會', text:s=>'一年一度的班際運動會，班導希望你能代表班上出賽拿面子。',
       choices:[
-        {label:'堅持依法蒐證，絕不放水', effects:{操守:10,偵查:4}, salary:30, flag:'clean'},
-        {label:'睜一隻眼閉一隻眼，收下紅包', effects:{操守:-15,人脈:6}, salary:150, flag:'corrupt'},
-        {label:'私下向督察室檢舉整起關說', effects:{操守:15,人脈:-8}, salary:10, flag:'whistle'},
-      ],
-      events:[
-        {text:'案件成功偵破，媒體大幅報導，你意外成了新聞焦點。', effects:{偵查:5,人脈:3}},
-        {text:'案子破了，但功勞被上級拿走大半。', effects:{}},
-        {text:'行動走漏風聲，主嫌逃逸，你被寫報告檢討。', effects:{偵查:-3,操守:-1}},
-      ],
-    },
-    {
-      id:'exam2', label:'升遷考試・巡官／警正', ageJump:5, exam:true, rankTarget:5,
-      fileNo:'CASE 06 · 職涯分岔',
-      intro: s => `你來到職涯的分岔口：走行政管理衝分局長，還是深耕偵查專攻大案，又或者申請外派國際刑警組織（Interpol）協查跨國案件？`,
-      choices:[
-        {label:'衝行政資歷，準備巡官考試', effects:{人脈:8,體能:-2}, bonus:0.12, salary:60},
-        {label:'深耕偵查專業，主攻大案指揮', effects:{偵查:9,操守:1}, bonus:0.14, salary:60},
-        {label:'申請外派國際刑警組織駐外', note:'罕見機會，眼界大開', effects:{偵查:5,人脈:5,體能:2}, bonus:0.08, salary:120, flag:'interpol'},
-      ],
-    },
-    {
-      id:'midlife', label:'中年抉擇', ageJump:7,
-      fileNo:'CASE 07 · 灰色地帶',
-      intro: s => `體檢報告顯示血壓偏高。同時你接到一通「老朋友」的電話——地方民代想請你在一件工程弊案上高抬貴手，家人則希望你能少加點班。`,
-      choices:[
-        {label:'拒絕關說，依法簽辦到底', effects:{操守:12,人脈:-5}, salary:20},
-        {label:'睜隻眼閉隻眼，換取仕途平順', effects:{操守:-14,人脈:8}, salary:120, flag:'corrupt2'},
-        {label:'申請調動內勤，多陪陪家人', effects:{體能:8,人脈:-3}, salary:20},
-      ],
-      events:[
-        {text:'清廉辦案的事蹟被地方報導，你成了模範警察候選人。', effects:{操守:3}, needMin:{操守:60}},
-        {text:'健康檢查亮紅燈，醫生要求你調整作息。', effects:{體能:-6}},
-        {text:'日子照舊，勤務排班一如往常。', effects:{}},
-      ],
-    },
-    {
-      id:'senior', label:'資深警官', ageJump:8,
-      fileNo:'CASE 08 · 老將歲月',
-      intro: s => `你已是分局裡資歷最深的警官之一，年輕後輩喊你一聲「前輩」。體力大不如前，但案件與勤務依然不會少一件。`,
-      choices:[
-        {label:'帶頭衝第一線，證明老將寶刀未老', effects:{體能:-8,偵查:5,人脈:3}, salary:40, risky:true},
-        {label:'轉任訓練教官，傳承經驗', effects:{人脈:6,操守:4,體能:2}, salary:40},
-        {label:'申請調任內勤主管，穩定收工', effects:{體能:6,偵查:-2}, salary:40},
-      ],
-      events:[
-        {text:'帶的新人在你的指導下破了大案，特別來謝謝你。', effects:{人脈:3}},
-        {text:'舊傷復發，你被迫請了兩週病假。', effects:{體能:-4}},
-        {text:'平順的一年，沒有太多波瀾。', effects:{}},
-      ],
-    },
+        {label:'代表班上出賽拚成績', effects:{體能:5,人脈:3}, salary:0},
+        {label:'留在後勤幫忙張羅', effects:{人脈:4}, salary:0},
+        {label:'請假留在寢室讀書', effects:{偵查:3,人脈:-2}, salary:0},
+      ]},
   ];
 
-  const RETIRE_CHOICES = [
-    {label:'申請退休，安享天年', effects:{}, salary:30, key:'early'},
-    {label:'拚到屆齡退休最後一刻，力求最高階級', effects:{偵查:3,人脈:3}, salary:60, key:'push', bonus:0.16},
-    {label:'婉拒退休，接受借調擔任顧問', note:'極少數機會', effects:{操守:2,人脈:4}, salary:100, key:'advise'},
+  const DUTY_POOL = [
+    {id:'d1', title:'深夜臨檢', text:s=>'深夜路檢站，一輛車看到臨檢燈猛然迴轉。要追嗎？',
+      choices:[
+        {label:'鳴笛追上去', note:'有機會逮到通緝犯，但也可能只是虛驚一場', effects:{偵查:4,體能:-2}, salary:12},
+        {label:'回報調度台請支援', effects:{人脈:2,操守:2}, salary:6},
+        {label:'算了，可能只是緊張的用路人', effects:{體能:1}, salary:4},
+      ]},
+    {id:'d2', title:'家暴現場', text:s=>'接獲通報趕到現場，屋內傳出爭執聲，你必須在幾秒內判斷怎麼進場。',
+      choices:[
+        {label:'強勢介入，優先保護被害人', effects:{操守:4,體能:-3}, salary:10},
+        {label:'先冷靜溝通，緩和雙方情緒', effects:{人脈:3}, salary:8},
+        {label:'依SOP等待社工到場再處理', effects:{操守:2}, salary:5},
+      ]},
+    {id:'d3', title:'交通事故', text:s=>'國道上一起連環追撞，你要在車陣中指揮交通、安撫傷者，還要顧勤務簿。',
+      choices:[
+        {label:'先衝去指揮交通避免二次事故', effects:{體能:5,操守:2}, salary:10},
+        {label:'優先照顧傷者情緒', effects:{人脈:4}, salary:8},
+        {label:'按標準流程一步步來，不搶快', effects:{偵查:2}, salary:5},
+      ]},
+    {id:'d4', title:'夜市鬥毆', text:s=>'夜市裡兩攤商為了地盤大打出手，圍觀民眾越聚越多。',
+      choices:[
+        {label:'直接上前壓制帶開雙方', effects:{體能:4,操守:-1}, salary:10},
+        {label:'先問清楚原因再處理', effects:{偵查:3,人脈:2}, salary:8},
+        {label:'呼叫線上警力一起支援', effects:{人脈:3}, salary:5},
+      ]},
+    {id:'d5', title:'里長施壓', text:s=>'里長三天兩頭打電話來，要求加強巡邏他家那條街，其他警網開始有意見。',
+      choices:[
+        {label:'配合加強巡邏，維持關係', effects:{人脈:5,體能:-2}, salary:8},
+        {label:'婉轉解釋警力有限，一視同仁', effects:{操守:3}, salary:5},
+        {label:'私下請同事幫忙擋一下', effects:{人脈:2,操守:-2}, salary:5},
+      ]},
+    {id:'d6', title:'業績壓力', text:s=>'月底考核將近，主管暗示這個月的開單數字有點難看。',
+      choices:[
+        {label:'照規矩該開就開，不多不少', effects:{操守:4}, salary:5},
+        {label:'抓緊時間衝一波數字', effects:{人脈:2,操守:-2}, salary:10},
+        {label:'跟主管坦白：治安比報表重要', effects:{操守:5,人脈:-3}, salary:0},
+      ]},
+    {id:'d7', title:'同事出包', text:s=>'同事勤務中出了小差錯，寫報告時偷偷問你要不要幫忙圓過去。',
+      choices:[
+        {label:'拒絕，如實記錄', effects:{操守:5,人脈:-3}, salary:5},
+        {label:'睜一隻眼閉一隻眼，人情留一線', effects:{操守:-4,人脈:4}, salary:5},
+        {label:'私下勸他自己去報告', effects:{操守:2,人脈:1}, salary:5},
+      ]},
+    {id:'d8', title:'民眾投訴', text:s=>'一名民眾在1999投訴你「執法態度不佳」，督察室要你寫說明書。',
+      choices:[
+        {label:'認真檢討，附上密錄器畫面自清', effects:{操守:3,偵查:1}, salary:5},
+        {label:'覺得委屈但還是照程序走', effects:{體能:-2}, salary:5},
+        {label:'找同事作證幫忙緩頰', effects:{人脈:3,操守:-2}, salary:5},
+      ]},
+    {id:'d9', title:'蛛絲馬跡', text:s=>'你在例行盤查中發現一絲不對勁的細節，可能牽出一整個竊盜集團。',
+      choices:[
+        {label:'深入追查，主動申請加班蒐證', effects:{偵查:6,體能:-3}, salary:16},
+        {label:'回報給偵查隊接手', effects:{偵查:2,人脈:2}, salary:6},
+        {label:'先記下來，等有空再說', effects:{}, salary:0},
+      ]},
+    {id:'d10', title:'排班拉扯', text:s=>'班表出爐，你被排進連續大夜，同事私下拜託你跟他調班去約會。',
+      choices:[
+        {label:'答應調班，人情留著', effects:{人脈:4,體能:-2}, salary:0},
+        {label:'婉拒，照表操課', effects:{操守:2}, salary:5},
+        {label:'跟班長反映排班不公', effects:{人脈:-1,操守:3}, salary:0},
+      ]},
+  ];
+
+  const SENIOR_POOL = [
+    {id:'s1', title:'舊傷復發', text:s=>'年輕時追捕嫌犯留下的舊傷，這陣子又開始隱隱作痛。',
+      choices:[
+        {label:'硬撐繼續值勤', effects:{體能:-5,操守:1}, salary:5},
+        {label:'申請減少外勤', effects:{體能:3,人脈:-1}, salary:5},
+        {label:'請假去做完整復健', effects:{體能:5}, salary:-10},
+      ]},
+    {id:'s2', title:'體檢紅字', text:s=>'例行體檢報告出現紅字，醫生建議你調整生活習慣。',
+      choices:[
+        {label:'認真調整作息', effects:{體能:4}, salary:0},
+        {label:'不以為意，繼續拚', effects:{體能:-4}, salary:5},
+        {label:'申請調整勤務強度', effects:{體能:2,人脈:-1}, salary:0},
+      ]},
+    {id:'s3', title:'帶新人', text:s=>'分局新分發來一位菜鳥，主管指派你當他的教育班長。',
+      choices:[
+        {label:'傾囊相授', effects:{人脈:5,操守:2}, salary:5},
+        {label:'意思意思帶一下', effects:{人脈:1}, salary:0},
+        {label:'嫌麻煩，推給別人', effects:{人脈:-2}, salary:0},
+      ]},
+    {id:'s4', title:'高風險圍捕', text:s=>'轄區內一起持械拒捕案件，需要有經驗的人帶隊突入。',
+      choices:[
+        {label:'親自帶隊衝第一線', effects:{體能:-6,偵查:5}, salary:20, risky:true},
+        {label:'在外圍指揮調度', effects:{偵查:2}, salary:8},
+        {label:'交給年輕人歷練', effects:{人脈:3}, salary:0},
+      ]},
+    {id:'s5', title:'內勤邀約', text:s=>'分局長問你要不要轉調內勤，早點放慢腳步。',
+      choices:[
+        {label:'答應轉調', effects:{體能:6,偵查:-2}, salary:5},
+        {label:'婉拒，還想留在第一線', effects:{體能:-2,操守:2}, salary:5},
+        {label:'再考慮看看', effects:{}, salary:0},
+      ]},
+    {id:'s6', title:'退休金話術', text:s=>'一通自稱「退休規劃顧問」的電話，慫恿你把退休金拿去做高報酬投資。',
+      choices:[
+        {label:'直接掛斷，順手通報反詐騙', effects:{操守:4,偵查:2}, salary:0},
+        {label:'心動，先問問同事意見', effects:{操守:1}, salary:0},
+        {label:'差點被騙，還好家人及時發現', effects:{操守:-2,體能:-1}, salary:-10},
+      ]},
+    {id:'s7', title:'同袍凋零', text:s=>'當年同梯的夥伴一個個申請退休，歡送會一場接一場。',
+      choices:[
+        {label:'好好把握剩下的同袍情誼', effects:{人脈:4}, salary:0},
+        {label:'開始認真思考自己的退休規劃', effects:{操守:2}, salary:0},
+        {label:'心裡有點空落落的', effects:{體能:-1}, salary:0},
+      ]},
+    {id:'s8', title:'假日時光', text:s=> s.kids>0 ? '難得的假日，孩子帶著孫子回來吵著要你講當年抓壞人的故事。' : '假日的家裡格外安靜，你一個人喝著茶看著舊照片。',
+      choices: s=> s.kids>0 ? [
+        {label:'開心分享當年勇', effects:{人脈:3}, rel:3, salary:0},
+        {label:'累了，想安靜休息', effects:{體能:2}, salary:0},
+        {label:'半推半就講了濃縮版', effects:{人脈:1}, salary:0},
+      ] : [
+        {label:'找老朋友聚一聚', effects:{人脈:3}, salary:0},
+        {label:'報名松年大學充實生活', effects:{偵查:1,體能:1}, salary:0},
+        {label:'就這樣一個人也挺好', effects:{操守:1}, salary:0},
+      ]},
+  ];
+
+  const ROMANCE_SINGLE = [
+    {id:'r1', title:'相親', text:s=>'家人張羅了一場相親，對方是隔壁分局同梯介紹的朋友。',
+      choices:[
+        {label:'認真赴約', rel:6, setStatus:'dating', salary:0},
+        {label:'客套走個過場', rel:1, salary:0},
+        {label:'找藉口值班推掉', rel:-1, salary:0},
+      ]},
+    {id:'r2', title:'轄區邂逅', text:s=>'巡邏時常經過的早餐店，老闆的孩子每次都幫你多加一顆蛋。',
+      choices:[
+        {label:'鼓起勇氣要了聯絡方式', rel:7, setStatus:'dating', salary:0},
+        {label:'只敢每天多聊兩句', rel:2, salary:0},
+        {label:'專心工作，不節外生枝', rel:0, effects:{體能:1}, salary:0},
+      ]},
+    {id:'r3', title:'警眷聯誼', text:s=>'分局辦了一場聯誼活動，同事極力慫恿你去露個臉。',
+      choices:[
+        {label:'去，說不定有緣分', rel:5, setStatus:'dating', salary:0},
+        {label:'去捧場但沒抱期待', rel:1, salary:0},
+        {label:'不去，把時間留給自己', rel:0, effects:{體能:1}, salary:0},
+      ]},
+  ];
+  const ROMANCE_DATING = [
+    {id:'r4', title:'紀念日撞班表', text:s=>'交往紀念日當天，你被排進大夜班。',
+      choices:[
+        {label:'想辦法喬班陪對方過節', rel:5, effects:{人脈:-2}, salary:0},
+        {label:'跟對方解釋，改天補過', rel:-2, salary:0},
+        {label:'帶對方一起去警局吃消夜', rel:2, effects:{人脈:1}, salary:0},
+      ]},
+    {id:'r5', title:'工作優先的抱怨', text:s=>'對方抱怨你手機24小時開著待命，好像永遠把工作放第一位。',
+      choices:[
+        {label:'認真聊聊，重新調整生活比重', rel:6, effects:{體能:1}, salary:0},
+        {label:'解釋這份工作的身不由己', rel:1, salary:0},
+        {label:'覺得對方不懂事，有點不耐煩', rel:-5, salary:0},
+      ]},
+    {id:'r6', title:'求婚時機', text:s=>'交往這些年，你開始認真思考：這個人，會是共度餘生的對象嗎？',
+      choices:[
+        {label:'求婚', rel:8, setStatus:'married', salary:20},
+        {label:'再觀察看看', rel:0, salary:0},
+        {label:'提出分手', rel:-10, setStatus:'single', salary:0},
+      ]},
+  ];
+  const ROMANCE_MARRIED_NOKIDS = [
+    {id:'r7', title:'該不該生小孩', text:s=>'配偶開始認真討論要不要生小孩，考量到你不規律的勤務。',
+      choices:[
+        {label:'決定要，一起面對挑戰', rel:5, addKid:true, effects:{體能:-2}, salary:0},
+        {label:'再等幾年，先顧好事業', rel:-1, salary:0},
+        {label:'決定不生，享受兩人世界', rel:3, salary:0},
+      ]},
+  ];
+  const ROMANCE_MARRIED_KIDS = [
+    {id:'r8', title:'小孩生病', text:s=>'小孩半夜發燒，你剛好排大夜班。',
+      choices:[
+        {label:'跟班長換班，衝回家', rel:6, effects:{人脈:-2}, salary:0},
+        {label:'打電話請配偶先扛著', rel:-3, salary:0},
+        {label:'拜託家人幫忙照顧', rel:1, salary:0},
+      ]},
+    {id:'r9', title:'加班的臭臉', text:s=>'這個月你已經第五次晚歸，配偶的臉色越來越臭。',
+      choices:[
+        {label:'主動申請調整排班', rel:5, effects:{人脈:-1}, salary:0},
+        {label:'解釋案子真的走不開', rel:-2, salary:0},
+        {label:'買束花回家哄一哄', rel:2, salary:-5},
+      ]},
+    {id:'r10', title:'被取消的旅行', text:s=>'排好的家庭旅遊，臨時被一通勤務電話打亂。',
+      choices:[
+        {label:'堅持請假，把時間留給家人', rel:5, effects:{操守:-1,人脈:-1}, salary:0},
+        {label:'帶著歉意取消，全力衝勤務', rel:-4, effects:{人脈:2}, salary:0},
+        {label:'先處理緊急狀況再追上家人', rel:1, effects:{體能:-2}, salary:0},
+      ]},
+  ];
+  const ROMANCE_MARRIED_ANY = [
+    {id:'r11', title:'婚姻諮商', text:s=>'你們的關係最近有點卡，配偶提議一起去諮商聊聊。',
+      choices:[
+        {label:'願意，一起面對問題', rel:7, salary:0},
+        {label:'覺得沒必要，但還是去了', rel:2, salary:0},
+        {label:'拒絕，覺得是浪費時間', rel:-6, salary:0},
+      ]},
+    {id:'r12', title:'模糊的界線', text:s=>'工作上認識的一位對象，最近對你格外關心，界線開始有點模糊。',
+      choices:[
+        {label:'保持距離，坦白告訴配偶這件事', rel:4, effects:{操守:3}, salary:0},
+        {label:'享受這份曖昧，但沒有真的越界', rel:-3, effects:{操守:-2}, salary:0},
+        {label:'劃清界線，減少私下聯絡', rel:2, salary:0},
+      ]},
+  ];
+  const ROMANCE_DIVORCED = [
+    {id:'r13', title:'獨自扶養', text:s=>'離婚後，孩子的日常起居全落在你身上，蠟燭多頭燒的生活正式開始。',
+      choices:[
+        {label:'調整班表，優先陪伴孩子', effects:{人脈:-2,體能:-2}, rel:2, salary:0},
+        {label:'拜託長輩幫忙分擔', effects:{人脈:2}, salary:0},
+        {label:'咬牙一個人扛', effects:{體能:-4,操守:2}, salary:0},
+      ]},
   ];
 
   /* ================= STATE ================= */
@@ -664,44 +455,122 @@
     const rng = makeRng(seedStr);
     const track = TRACKS.find(t=>t.id===trackId) || TRACKS[0];
     const stats = {體能:0,偵查:0,人脈:0,操守:0};
-    Object.keys(stats).forEach(k=>{
-      stats[k] = Math.round(16 + rng()*13) + (track.bonus[k]||0);
-      stats[k] = clamp(stats[k]);
-    });
+    Object.keys(stats).forEach(k=>{ stats[k] = clamp(Math.round(16 + rng()*13) + (track.bonus[k]||0)); });
     return {
-      seed: seedStr,
-      rng: rng,
-      name: name || '無名警員',
-      track: track,
-      age: 18,
-      year: 2026,
-      rankIdx: 1,
-      salary: 0,
-      stats: stats,
-      stageIndex: 0,
-      log: [],
-      flags: {},
+      seed: seedStr, rng: rng, name: name || '無名警員', track: track,
+      age: 18, year: 2026, rankIdx: 1, salary: 0, stats: stats,
+      relStatus:'single', relStat:50, partnerName:null, kids:0,
+      mode:'career', extendRemaining:0, flags: {}, log: [],
+      used:{academy:[],duty:[],senior:[],romSingle:[],romDating:[],romNoKids:[],romKids:[],romAny:[],romDiv:[]},
       fileNumber: String(1000 + Math.floor(rng()*8999)),
     };
   }
 
-  function clamp(v){ return Math.max(0, Math.min(99, Math.round(v))); }
   function overall(s){ return Math.round((s.stats.體能 + s.stats.偵查 + s.stats.人脈)/3); }
   function rankName(s){ return RANKS[s.rankIdx]; }
-
+  function relLabel(s){
+    if (s.relStatus==='single') return '單身';
+    if (s.relStatus==='dating') return `交往中（與 ${s.partnerName}）`;
+    if (s.relStatus==='married') return `已婚（與 ${s.partnerName}）${s.kids>0?' · 育有子女':''}`;
+    if (s.relStatus==='divorced') return `離異${s.kids>0?' · 獨力扶養子女':''}`;
+    return '單身';
+  }
   function applyEffects(s, effects){
     const applied = {};
     Object.keys(effects||{}).forEach(k=>{
-      if (k==='操守' || k==='體能' || k==='偵查' || k==='人脈'){
-        const before = s.stats[k];
-        s.stats[k] = clamp(s.stats[k] + effects[k]);
-        applied[k] = s.stats[k]-before;
+      if (['操守','體能','偵查','人脈'].includes(k)){
+        const before = s.stats[k]; s.stats[k] = clamp(s.stats[k] + effects[k]); applied[k] = s.stats[k]-before;
       }
     });
     return applied;
   }
+  function pushLog(text){ state.log.push({age: state.age, text: text}); }
+  function drawFromPool(pool, usedArr){
+    let unused = pool.filter(e=>usedArr.indexOf(e.id)===-1);
+    if (!unused.length){ usedArr.length = 0; unused = pool.slice(); }
+    const chosen = unused[Math.floor(state.rng()*unused.length)];
+    usedArr.push(chosen.id);
+    return chosen;
+  }
+  function romancePoolFor(s){
+    if (s.relStatus==='single') return {pool:ROMANCE_SINGLE, used:s.used.romSingle};
+    if (s.relStatus==='dating') return {pool:ROMANCE_DATING, used:s.used.romDating};
+    if (s.relStatus==='married'){
+      const bag = s.kids>0 ? ROMANCE_MARRIED_KIDS.concat(ROMANCE_MARRIED_ANY) : ROMANCE_MARRIED_NOKIDS.concat(ROMANCE_MARRIED_ANY);
+      return {pool:bag, used:s.used.romAny};
+    }
+    if (s.relStatus==='divorced' && s.kids>0) return {pool:ROMANCE_DIVORCED, used:s.used.romDiv};
+    return null;
+  }
 
-  /* ================= RENDER HELPERS ================= */
+  function milestoneGrad(s){
+    return {kind:'milestone', mkey:'grad', label:'畢業分發', fileNo:`AGE ${s.age} · 分發志願`, romance:false, title:'畢業分發',
+      text:`畢業在即，${s.name}，你必須決定第一份工作要去哪裡——這個選擇會形塑你未來十年的路。`,
+      choices:[
+        {label:'申請直轄市大型分局', note:'案量大、升遷快，但競爭激烈', effects:{人脈:5,體能:2}, salary:80},
+        {label:'申請偏鄉派出所', note:'磨基本功，人情味重', effects:{偵查:3,操守:5}, salary:50},
+        {label:'考特考轉刑事鑑識線', note:'專業掛帥，起步較辛苦', effects:{偵查:9,操守:-1}, salary:70},
+      ]};
+  }
+  function milestoneExam(s, rankTarget, label, prompt){
+    return {kind:'exam', label:label, fileNo:`AGE ${s.age} · 資格考核`, romance:false, title:label, text:prompt, rankTarget:rankTarget,
+      choices:[
+        {label:'請假閉關苦讀', effects:{偵查:6,體能:-3}, examBonus:0.18, salary:20},
+        {label:'邊上班邊準備，穩紮穩打', effects:{偵查:4,人脈:2}, examBonus:0.10, salary:20},
+        {label:'靠年資排隊，佛系應考', effects:{操守:2,體能:2}, examBonus:0.0, salary:10},
+      ]};
+  }
+  function milestoneCase(s){
+    return {kind:'milestone', mkey:'case1', label:'重大專案', fileNo:`AGE ${s.age} · 專案偵辦`, romance:false, title:'重大專案・毒品查緝',
+      text:'分局接獲線報，你被編入緝毒專案小組，追查一條運毒管道。指揮官暗示：睜一隻眼閉一隻眼，紅包少不了你的份。',
+      choices:[
+        {label:'堅持依法蒐證，絕不放水', effects:{操守:10,偵查:4}, salary:30, flag:'clean'},
+        {label:'睜一隻眼閉一隻眼，收下紅包', effects:{操守:-15,人脈:6}, salary:150, flag:'corrupt'},
+        {label:'私下向督察室檢舉整起關說', effects:{操守:15,人脈:-8}, salary:10, flag:'whistle'},
+      ]};
+  }
+  function milestoneMidlife(s){
+    return {kind:'milestone', mkey:'midlife', label:'灰色地帶', fileNo:`AGE ${s.age} · 誘惑試探`, romance:false, title:'中年抉擇',
+      text:'體檢報告顯示血壓偏高。同時你接到一通「老朋友」的電話——地方民代想請你在一件工程弊案上高抬貴手。',
+      choices:[
+        {label:'拒絕關說，依法簽辦到底', effects:{操守:12,人脈:-5}, salary:20},
+        {label:'睜隻眼閉隻眼，換取仕途平順', effects:{操守:-14,人脈:8}, salary:120, flag:'corrupt2'},
+        {label:'申請調動內勤，多陪陪家人', effects:{體能:8,人脈:-3}, salary:20},
+      ]};
+  }
+  const MILESTONE_AGES = {
+    21: s=>milestoneGrad(s),
+    26: s=>milestoneExam(s,3,'升遷考試・巡佐','巡佐考試在即。你可以拚死拚活準備筆試，也可以靠年資與人脈慢慢熬。'),
+    29: s=>milestoneCase(s),
+    33: s=>milestoneExam(s,5,'升遷考試・巡官／警正','你來到職涯的分岔口：走行政管理衝分局長，還是深耕偵查專攻大案？'),
+    40: s=>milestoneMidlife(s),
+  };
+
+  function getRound(s){
+    if (MILESTONE_AGES[s.age]) return MILESTONE_AGES[s.age](s);
+    if (s.age>=18 && s.age<=20){
+      const ev = drawFromPool(ACADEMY_POOL, s.used.academy);
+      return {kind:'normal', category:'academy', label:ev.title, fileNo:`AGE ${s.age} · 警專養成`, romance:false, title:ev.title, text:ev.text(s), choices:ev.choices};
+    }
+    const romChance = s.age>=48 ? 0.28 : 0.4;
+    if (s.age>=22 && s.rng() < romChance){
+      const rp = romancePoolFor(s);
+      if (rp){
+        const ev = drawFromPool(rp.pool, rp.used);
+        return {kind:'normal', category:'romance', label:ev.title, fileNo:`AGE ${s.age} · 私人時光`, romance:true, title:ev.title, text:ev.text(s), choices:ev.choices};
+      }
+    }
+    if (s.age>=48){
+      const ev = drawFromPool(SENIOR_POOL, s.used.senior);
+      const choices = typeof ev.choices==='function' ? ev.choices(s) : ev.choices;
+      const text = typeof ev.text==='function' ? ev.text(s) : ev.text;
+      return {kind:'normal', category:'senior', label:ev.title, fileNo:`AGE ${s.age} · 資深歲月`, romance:false, title:ev.title, text:text, choices:choices};
+    }
+    const ev = drawFromPool(DUTY_POOL, s.used.duty);
+    return {kind:'normal', category:'duty', label:ev.title, fileNo:`AGE ${s.age} · 勤務日常`, romance:false, title:ev.title, text:ev.text(s), choices:ev.choices};
+  }
+
+  /* ================= RENDER ================= */
   const screen = document.getElementById('screen');
   const statusbar = document.getElementById('statusbar');
 
@@ -710,54 +579,31 @@
     statusbar.classList.add('show');
     const s = state;
     statusbar.innerHTML = `
-      <div class="row1">
-        <span class="rank">${rankName(s)} · ${s.name}</span>
-        <span class="meta mono">${s.age}歲 / ${s.year}年 / ${s.salary}萬</span>
-      </div>
-      <div class="statbars">
-        ${statItem('體能', s.stats.體能, 'body')}
-        ${statItem('偵查', s.stats.偵查, 'inv')}
-        ${statItem('人脈', s.stats.人脈, 'rel')}
-        ${statItem('操守', s.stats.操守, 'int')}
-      </div>`;
+      <div class="row1"><span class="rank">${rankName(s)} · ${s.name}</span><span class="meta mono">${s.age}歲 / ${s.year}年 / ${s.salary}萬</span></div>
+      <div class="statbars">${statItem('體能', s.stats.體能, 'body')}${statItem('偵查', s.stats.偵查, 'inv')}${statItem('人脈', s.stats.人脈, 'rel')}${statItem('操守', s.stats.操守, 'int')}</div>
+      <div class="relline">♥ ${relLabel(s)}</div>`;
   }
   function statItem(label, val, cls){
-    return `<div class="statitem">
-      <div class="lbl"><span>${label}</span><b>${val}</b></div>
-      <div class="track"><div class="fill ${cls}" style="width:${val}%"></div></div>
-    </div>`;
+    return `<div class="statitem"><div class="lbl"><span>${label}</span><b>${val}</b></div><div class="track"><div class="fill ${cls}" style="width:${val}%"></div></div></div>`;
   }
-
   function careerLogHTML(){
     if (!state.log.length) return '';
-    const items = state.log.slice().reverse().map(l=>`<div class="item"><b>${l.age}歲</b>　${l.text}</div>`).join('');
-    return `<details class="careerlog">
-      <summary>生涯記事（${state.log.length}）▾</summary>
-      <div class="items">${items}</div>
-    </details>`;
+    const items = state.log.slice().reverse().slice(0,60).map(l=>`<div class="item"><b>${l.age}歲</b>　${l.text}</div>`).join('');
+    return `<details class="careerlog"><summary>生涯記事（${state.log.length}）▾</summary><div class="items">${items}</div></details>`;
   }
 
-  /* ================= SCREENS ================= */
   function screenStart(){
     renderStatus();
     let selectedTrack = TRACKS[0].id;
     let seed = genSeed();
-
     function draw(){
       screen.innerHTML = `
         <div class="hero-eyebrow mono">CASE FILE · 招募中</div>
         <h1 class="title">警察人生<br>模擬程式<em>POLICE LIFE — 一場種子化的警察生涯模擬</em></h1>
-        <p class="tagline">從警專新生到警界名人堂，分發、專案、關說、殉職——每一個決定都算數。</p>
-
+        <p class="tagline">從警專新生到警界名人堂，每一年都有新的抉擇——升遷、辦案、關說與愛情，結果隨機率而定，全部種子化重現。</p>
         <div class="card">
-          <div class="field">
-            <label>姓名</label>
-            <input type="text" id="nameInput" maxlength="12" placeholder="輸入你的警員姓名">
-          </div>
-          <div class="field">
-            <label>警種選擇</label>
-            <div class="track-grid" id="trackGrid"></div>
-          </div>
+          <div class="field"><label>姓名</label><input type="text" id="nameInput" maxlength="12" placeholder="輸入你的警員姓名"></div>
+          <div class="field"><label>警種選擇</label><div class="track-grid" id="trackGrid"></div></div>
           <div class="field">
             <label>世界種子（相同種子＋相同選擇＝相同人生）</label>
             <div class="seedrow">
@@ -765,20 +611,15 @@
               <button class="iconbtn" id="reseedBtn" title="換一個種子">↺</button>
               <button class="iconbtn" id="importBtn" title="輸入朋友的種子碼">📥</button>
             </div>
-            <div class="seedhint">可直接輸入朋友的種子碼，走一遍一模一樣的人生際遇。</div>
+            <div class="seedhint">不同種子會有不同的分發、案件與感情際遇；即使選一樣的選項，結果也會依機率有所不同。</div>
           </div>
         </div>
-
         <button class="btn-primary" id="startBtn">開始生涯 ▸ 警專新生</button>
         <p class="disclaimer">本模擬純屬虛構，人生際遇如有雷同，純屬巧合。</p>
       `;
       const grid = document.getElementById('trackGrid');
-      grid.innerHTML = TRACKS.map(t=>`
-        <button class="track-opt ${t.id===selectedTrack?'sel':''}" data-id="${t.id}">
-          <div class="icon">${t.icon}</div>
-          <div class="name">${t.name}</div>
-          <div class="desc">${t.desc}</div>
-        </button>`).join('');
+      grid.innerHTML = TRACKS.map(t=>`<button class="track-opt ${t.id===selectedTrack?'sel':''}" data-id="${t.id}">
+          <div class="icon">${t.icon}</div><div class="name">${t.name}</div><div class="desc">${t.desc}</div></button>`).join('');
       grid.querySelectorAll('.track-opt').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           selectedTrack = btn.dataset.id;
@@ -786,167 +627,195 @@
           btn.classList.add('sel');
         });
       });
-      document.getElementById('reseedBtn').addEventListener('click', ()=>{
-        seed = genSeed();
-        document.getElementById('seedDisplay').textContent = seed;
-      });
+      document.getElementById('reseedBtn').addEventListener('click', ()=>{ seed = genSeed(); document.getElementById('seedDisplay').textContent = seed; });
       document.getElementById('importBtn').addEventListener('click', ()=>{
         const v = prompt('輸入種子碼：', seed);
-        if (v && v.trim()){
-          seed = v.trim().toUpperCase();
-          document.getElementById('seedDisplay').textContent = seed;
-        }
+        if (v && v.trim()){ seed = v.trim().toUpperCase(); document.getElementById('seedDisplay').textContent = seed; }
       });
       document.getElementById('startBtn').addEventListener('click', ()=>{
         const name = document.getElementById('nameInput').value.trim() || '無名警員';
         state = initState(seed, name, selectedTrack);
-        pushLog('分發志願尚未決定，你剛從警專校門走出來。', true);
-        screenStage();
+        pushLog('剛從警專校門走出來，未來還是一片空白。');
+        screenRound();
       });
     }
     draw();
   }
 
-  function pushLog(text, first){
-    state.log.push({age: state.age, text: text});
-  }
-
-  function currentStage(){
-    return STAGES[state.stageIndex];
-  }
-
-  function screenStage(){
+  function screenRound(){
     renderStatus();
-    const stage = currentStage();
-    if (!stage){ screenRetire(); return; }
-
+    const s = state;
+    if (s.mode==='career' && s.age>RETIRE_AGE){ screenRetireDecision(); return; }
+    const round = getRound(s);
+    const totalSpan = RETIRE_AGE-18+1;
+    const doneSpan = s.mode==='extend' ? totalSpan : (s.age-18+1);
     screen.innerHTML = `
-      <div class="stageprog mono">
-        <span>第 ${state.stageIndex+1} / ${STAGES.length+1} 階段</span>
-        <span>${stage.fileNo}</span>
-      </div>
-      <div class="file-card">
-        <div class="file-num mono">FILE No. ${state.fileNumber}-${state.stageIndex+1} ／ ${stage.label}</div>
-        <div class="file-title">${stage.label}</div>
-        <div class="file-body">${stage.intro(state)}</div>
+      <div class="stageprog mono"><span>${s.mode==='extend'?'延任生涯':`第 ${doneSpan} / ${totalSpan} 年`}</span><span>${round.fileNo}</span></div>
+      <div class="file-card ${round.romance?'romance':''}">
+        <div class="file-num mono">FILE No. ${s.fileNumber}-${s.age} ／ ${round.label}</div>
+        <div class="file-title">${round.title}</div>
+        <div class="file-body">${round.text}</div>
       </div>
       <div class="choices" id="choiceWrap"></div>
       ${careerLogHTML()}
     `;
     const wrap = document.getElementById('choiceWrap');
-    stage.choices.forEach((c, idx)=>{
+    round.choices.forEach(c=>{
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
       btn.innerHTML = `${c.label}${c.note?`<span class="note">${c.note}</span>`:''}`;
-      btn.addEventListener('click', ()=> resolveChoice(stage, c));
+      btn.addEventListener('click', ()=> resolveRound(round, c));
       wrap.appendChild(btn);
     });
   }
 
-  function resolveChoice(stage, choice){
+  function resolveRound(round, choice){
     const s = state;
-    const applied = applyEffects(s, choice.effects);
-    s.salary += (choice.salary||0);
-    if (choice.flag) s.flags[choice.flag] = true;
+    let stampHTML = '', tierLineHTML = '', resultText = '', applied = {}, salaryDelta = 0, relDelta = 0;
 
-    let stampHTML = '';
-    let resultText = '';
-    let extraApplied = {};
-
-    if (stage.exam){
-      const chance = clamp01(
-        (s.stats.偵查*0.4 + s.stats.人脈*0.35 + s.stats.操守*0.15 + s.stats.體能*0.10)/99 + (choice.bonus||0)
-      );
-      const roll = s.rng();
-      if (roll < chance){
-        s.rankIdx = Math.min(choice.rankTarget, RANKS.length-1);
+    if (round.kind==='exam'){
+      applied = applyEffects(s, choice.effects);
+      s.salary += (choice.salary||0);
+      const chance = clamp01((s.stats.偵查*0.4 + s.stats.人脈*0.35 + s.stats.操守*0.15 + s.stats.體能*0.10)/99 + (choice.examBonus||0));
+      if (s.rng() < chance){
+        s.rankIdx = Math.min(round.rankTarget, RANKS.length-1);
         s.salary += 60;
         stampHTML = `<div class="stamp">考核 · 及格</div>`;
         resultText = `放榜當天，你的名字出現在合格名單上——晉任「${rankName(s)}」。`;
       } else {
         stampHTML = `<div class="stamp bad">考核 · 未通過</div>`;
         resultText = `差了臨門一腳，這次考核未能通過。主管拍拍你的肩：「下一次。」`;
-        extraApplied = applyEffects(s, {偵查:1});
+        applied = Object.assign(applied, applyEffects(s, {偵查:1}));
       }
-    } else if (stage.events && stage.events.length){
-      const pool = stage.events.filter(e => !e.needMin || Object.keys(e.needMin).every(k=>s.stats[k]>=e.needMin[k]));
-      const ev = pool[Math.floor(s.rng()*pool.length)] || stage.events[stage.events.length-1];
-      resultText = ev.text;
-      extraApplied = applyEffects(s, ev.effects);
-      if (stage.id==='case1' || stage.id==='midlife'){
-        stampHTML = `<div class="stamp ${choice.flag && choice.flag.indexOf('corrupt')>-1 ? 'bad':'gold'}">${choice.flag && choice.flag.indexOf('corrupt')>-1 ? '案件 · 列管':'案件 · 結案'}</div>`;
+    } else if (round.kind==='milestone'){
+      applied = applyEffects(s, choice.effects);
+      s.salary += (choice.salary||0);
+      if (choice.flag) s.flags[choice.flag] = true;
+      const bad = choice.flag && choice.flag.indexOf('corrupt')>-1;
+      const vt = rollMilestoneVariant(s.rng);
+      const vLine = MILESTONE_VARIANT_LINES[round.mkey][vt];
+      const nudge = vt==='great'?2:(vt==='bad'?-2:0);
+      if (nudge){ const extra = applyEffects(s, {人脈:nudge}); applied.人脈 = (applied.人脈||0)+(extra.人脈||0); }
+      resultText = vLine;
+      stampHTML = `<div class="stamp ${bad?'bad':(vt==='great'?'gold':'')}">案件 · ${bad?'列管':'結案'}</div>`;
+    } else if (round.romance){
+      const outcome = rollOutcome(s.rng);
+      const scaled = scaleEffects(choice.effects, outcome.mult);
+      applied = applyEffects(s, scaled);
+      salaryDelta = Math.round((choice.salary||0)*outcome.mult);
+      s.salary += salaryDelta;
+      relDelta = Math.round((choice.rel||0)*outcome.mult);
+
+      if (choice.setStatus==='dating'){
+        if (outcome.tier==='bad'){
+          resultText = `你鼓起勇氣表明心意，但對方委婉拒絕了，這份心意暫時只能放在心裡。`;
+          stampHTML = `<div class="stamp bad">告白 · 被拒</div>`;
+          relDelta = Math.min(relDelta, 1);
+        } else {
+          s.partnerName = PARTNER_NAMES[Math.floor(s.rng()*PARTNER_NAMES.length)];
+          s.relStatus = 'dating';
+          resultText = `你和${s.partnerName}開始交往了。`;
+          stampHTML = `<div class="stamp pink">感情 · 交往中</div>`;
+        }
+      } else if (choice.setStatus==='married'){
+        const proposeChance = clamp01((s.relStat/99) * (outcome.tier==='bad'?0.3:1));
+        if (s.rng() < proposeChance){
+          s.relStatus = 'married';
+          resultText = `${s.partnerName}答應了你的求婚，你們決定攜手共度往後的日子。`;
+          stampHTML = `<div class="stamp pink">感情 · 已婚</div>`;
+        } else {
+          resultText = `你鼓起勇氣求婚，${s.partnerName}卻說還沒準備好。這段關係還需要多一點時間醞釀。`;
+          stampHTML = `<div class="stamp bad">求婚 · 被拒</div>`;
+          relDelta -= 8;
+        }
+      } else if (choice.setStatus==='single'){
+        resultText = `你和${s.partnerName||'對方'}分手了。感情這條路，只能重新開始。`;
+        stampHTML = `<div class="stamp bad">感情 · 分手</div>`;
+        s.relStatus = 'single'; s.partnerName = null;
+      } else {
+        resultText = `${choice.label}——${pickLine('romance', outcome.tier, s.rng)}`;
+        if (outcome.tier==='great') stampHTML = `<div class="stamp pink">感情 · 昇溫</div>`;
       }
+      if (choice.addKid){
+        s.kids += 1;
+        resultText += ` 不久後，你們迎來了第一個孩子。`;
+        stampHTML = `<div class="stamp pink">家庭 · 添丁</div>`;
+      }
+      s.relStat = clamp(s.relStat + relDelta);
+      tierLineHTML = outcome.tier==='great'||outcome.tier==='bad' ? `<div class="tierline ${outcome.tier}">${TIER_LABEL[outcome.tier]}</div>` : '';
     } else {
-      resultText = '這段日子平順地過去了。';
-    }
-
-    // senior stage risk of line-of-duty death
-    if (stage.id==='senior' && choice.risky){
-      const roll = s.rng();
-      if (roll < 0.07){
-        s.flags.duty_death = true;
-        stampHTML = `<div class="stamp bad">殉職</div>`;
-        resultText = `執行圍捕任務時，你為了掩護後進而身受重傷，最終不治。你的名字，將被刻在警察紀念碑上。`;
+      // normal duty / academy / senior
+      if (choice.risky){
+        const dieRoll = s.rng();
+        if (dieRoll < 0.04){
+          applied = applyEffects(s, choice.effects);
+          s.salary += (choice.salary||0);
+          s.flags.duty_death = true;
+          stampHTML = `<div class="stamp bad">殉職</div>`;
+          resultText = `執行圍捕任務時，你為了掩護後進而身受重傷，最終不治。你的名字，將被刻在警察紀念碑上。`;
+          pushLog(`【${round.label}】${choice.label}。${resultText}`);
+          finishRound(stampHTML, '', resultText, applied, 0, 0, round);
+          return;
+        }
       }
+      const outcome = rollOutcome(s.rng);
+      const scaled = scaleEffects(choice.effects, outcome.mult);
+      applied = applyEffects(s, scaled);
+      salaryDelta = Math.round((choice.salary||0)*outcome.mult);
+      s.salary += salaryDelta;
+      resultText = `${choice.label}——${pickLine(round.category, outcome.tier, s.rng)}`;
+      if (outcome.tier==='great') stampHTML = `<div class="stamp gold">${TIER_LABEL.great}</div>`;
+      else if (outcome.tier==='bad') stampHTML = `<div class="stamp bad">${TIER_LABEL.bad}</div>`;
+      tierLineHTML = (outcome.tier==='normal'||outcome.tier==='minor') ? '' : '';
     }
 
-    s.age += stage.ageJump;
-    s.year = 2026 + (s.age - 18);
-    pushLog(`【${stage.label}】${choice.label}。${resultText}`, false);
+    pushLog(`【${round.label}】${choice.label}。${resultText}`);
+    finishRound(stampHTML, tierLineHTML, resultText, applied, salaryDelta, relDelta, round);
+  }
 
-    const deltaAll = mergeDeltas(applied, extraApplied);
-
+  function finishRound(stampHTML, tierLineHTML, resultText, applied, salaryDelta, relDelta, round){
+    const s = state;
     screen.innerHTML = `
       <div class="resolve-wrap">
         ${stampHTML}
-        <div class="log-entry">${resultText}</div>
-        ${deltaRowHTML(deltaAll, choice.salary)}
+        <div class="log-entry ${round.romance?'romance':''}">${resultText}</div>
+        ${deltaRowHTML(applied, salaryDelta, relDelta)}
         <button class="btn-primary" id="continueBtn">繼續 ▸</button>
       </div>
       ${careerLogHTML()}
     `;
     renderStatus();
     document.getElementById('continueBtn').addEventListener('click', ()=>{
-      if (s.flags.duty_death){
-        screenEnding();
-        return;
-      }
-      s.stageIndex++;
-      if (s.stageIndex >= STAGES.length){
-        screenRetire();
-      } else {
-        screenStage();
-      }
+      if (s.flags.duty_death){ screenEnding(); return; }
+      if (s.mode==='career'){ s.age += 1; s.year += 1; screenRound(); }
+      else { s.extendRemaining -= 1; s.age += 1; s.year += 1; if (s.extendRemaining<=0){ screenEnding(); } else { screenRound(); } }
     });
   }
 
-  function clamp01(v){ return Math.max(0.05, Math.min(0.95, v)); }
-  function mergeDeltas(a,b){
-    const out = Object.assign({}, a);
-    Object.keys(b||{}).forEach(k=> out[k] = (out[k]||0) + b[k]);
-    return out;
-  }
-  function deltaRowHTML(deltas, salary){
-    const chips = Object.keys(deltas).filter(k=>deltas[k]!==0).map(k=>{
-      const v = deltas[k];
-      return `<span class="delta ${v>0?'pos':'neg'}">${k} ${v>0?'+':''}${v}</span>`;
+  function deltaRowHTML(deltas, salary, rel){
+    const chips = Object.keys(deltas||{}).filter(k=>deltas[k]!==0).map(k=>{
+      const v = deltas[k]; return `<span class="delta ${v>0?'pos':'neg'}">${k} ${v>0?'+':''}${v}</span>`;
     });
-    if (salary) chips.push(`<span class="delta pos">薪資 +${salary}萬</span>`);
+    if (salary) chips.push(`<span class="delta ${salary>0?'pos':'neg'}">薪資 ${salary>0?'+':''}${salary}萬</span>`);
+    if (rel) chips.push(`<span class="delta ${rel>0?'pos':'neg'}">感情 ${rel>0?'+':''}${rel}</span>`);
     if (!chips.length) return '';
     return `<div class="delta-row">${chips.join('')}</div>`;
   }
 
-  function screenRetire(){
+  const RETIRE_CHOICES = [
+    {label:'申請退休，安享天年', effects:{}, salary:30, key:'early'},
+    {label:'拚到屆齡最後一刻，力求最高階級', effects:{偵查:3,人脈:3}, salary:60, key:'push', bonus:0.16},
+    {label:'婉拒退休，接受借調擔任顧問', note:'極少數機會', effects:{操守:2,人脈:4}, salary:100, key:'advise'},
+  ];
+
+  function screenRetireDecision(){
     renderStatus();
     screen.innerHTML = `
-      <div class="stageprog mono">
-        <span>第 ${STAGES.length+1} / ${STAGES.length+1} 階段</span>
-        <span>CASE 09 · 退休抉擇</span>
-      </div>
+      <div class="stageprog mono"><span>退休抉擇</span><span>AGE ${state.age} · 生涯終章</span></div>
       <div class="file-card">
         <div class="file-num mono">FILE No. ${state.fileNumber}-F ／ 退休抉擇</div>
         <div class="file-title">退休抉擇</div>
-        <div class="file-body">你已符合申請退休的資格。是要見好就收、含飴弄孫，還是拚到屆齡最後一刻，力求生涯最高峰？</div>
+        <div class="file-body">你已符合申請退休的資格。是要見好就收、含飴弄孫，還是拚到最後一刻，爭取生涯最高峰？</div>
       </div>
       <div class="choices" id="choiceWrap"></div>
       ${careerLogHTML()}
@@ -974,70 +843,57 @@
       } else {
         resultText = `你在崗位上撐到了屆齡的最後一天，階級停在「${rankName(s)}」，但沒有人能說你不夠拚。`;
       }
+      s.mode='extend'; s.extendRemaining=3;
     } else if (choice.key==='advise'){
       resultText = `你婉拒了退休，接受借調成為顧問，繼續在會議室裡發揮多年辦案經驗。`;
+      s.mode='extend'; s.extendRemaining=2;
     } else {
-      resultText = `你在核准的第一天就送出退休申請，準備把時間留給家人與自己。`;
+      resultText = `你在核准的第一天就送出退休申請，準備把時間留給自己與${s.relStatus==='married'?s.partnerName:'家人'}。`;
+      s.mode='extend'; s.extendRemaining=0;
     }
-    s.age += 8;
-    s.year = 2026 + (s.age-18);
-    pushLog(`【退休抉擇】${choice.label}。${resultText}`, false);
-
+    pushLog(`【退休抉擇】${choice.label}。${resultText}`);
     screen.innerHTML = `
       <div class="resolve-wrap">
-        <div class="stamp gold">生涯 · 完結</div>
+        <div class="stamp gold">生涯 · ${s.extendRemaining>0?'延任':'完結'}</div>
         <div class="log-entry">${resultText}</div>
         ${deltaRowHTML(applied, choice.salary)}
-        <button class="btn-primary" id="continueBtn">查看生涯總評 ▸</button>
+        <button class="btn-primary" id="continueBtn">${s.extendRemaining>0?'繼續 ▸':'查看生涯總評 ▸'}</button>
       </div>
     `;
-    document.getElementById('continueBtn').addEventListener('click', screenEnding);
+    document.getElementById('continueBtn').addEventListener('click', ()=>{
+      if (s.extendRemaining>0){ screenRound(); } else { screenEnding(); }
+    });
   }
 
-  /* ================= ENDING ================= */
   function computeEnding(s){
     const ov = overall(s);
     const integ = s.stats.操守;
+    const famLine = s.relStatus==='married' ? `退休那天，陪在你身邊的是${s.partnerName}${s.kids>0?'與孩子':''}。`
+      : s.relStatus==='dating' ? `退休那天，${s.partnerName}特地請假來參加你的歡送會。`
+      : s.relStatus==='divorced' ? `退休那天，孩子特地回來陪你，說是要補回這些年錯過的時間。`
+      : `退休那天，來的大多是同袍——這輩子，你把大半的時間都留給了這份工作。`;
     if (s.flags.duty_death){
-      return {
-        icon:'🎖️', title:'英勇殉職',
-        sub:`追晉一階 · ${rankName(s)}`,
-        body:`${s.name}在執勤中殉職，享年${s.age}歲。警察節的追思名單上，多了一個被永遠記住的名字。同袍在紀念碑前立正敬禮，家屬領取撫卹金與國家榮耀，但誰都寧願這份榮耀從未發生過。`
-      };
+      return {icon:'🎖️', title:'英勇殉職', sub:`追晉一階 · ${rankName(s)}`,
+        body:`${s.name}在執勤中殉職，享年${s.age}歲。警察節的追思名單上，多了一個被永遠記住的名字。同袍在紀念碑前立正敬禮，家屬領取撫卹金與國家榮耀，但誰都寧願這份榮耀從未發生過。`};
     }
     if (integ <= 25 && (s.flags.corrupt || s.flags.corrupt2)){
-      return {
-        icon:'⚠️', title:'貪瀆去職',
-        sub:`除警籍 · 末代階級 ${rankName(s)}`,
-        body:`廉政署的調查小組在一次金流稽核中盯上了${s.name}。收賄的證據一項項浮出水面，最終被依貪污治罪條例起訴、除籍收押。年輕時穿上制服的驕傲，換來的是新聞跑馬燈上一閃而過的名字。`
-      };
+      return {icon:'⚠️', title:'貪瀆去職', sub:`除警籍 · 末代階級 ${rankName(s)}`,
+        body:`廉政署的調查小組在一次金流稽核中盯上了${s.name}。收賄的證據一項項浮出水面，最終被依貪污治罪條例起訴、除籍收押。年輕時穿上制服的驕傲，換來的是新聞跑馬燈上一閃而過的名字。`};
     }
     if (integ >= 75 && ov >= 70 && s.rankIdx >= 5){
-      return {
-        icon:'🏅', title:'警界名人堂',
-        sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
-        body:`${s.name}以清廉與實力走完整段警察生涯，退休典禮上擠滿了同袍與受過你幫助的市民。地方警友會將你的辦案故事寫進教材，後進口中「傳說中的前輩」，說的就是你。`
-      };
+      return {icon:'🏅', title:'警界名人堂', sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+        body:`${s.name}以清廉與實力走完整段警察生涯，退休典禮上擠滿了同袍與受過你幫助的市民。地方警友會將你的辦案故事寫進教材，後進口中「傳說中的前輩」，說的就是你。${famLine}`};
     }
     if (integ >= 55 && ov >= 55){
-      return {
-        icon:'🏆', title:'模範警察退休',
-        sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
-        body:`${s.name}在崗位上兢兢業業${s.age-18}年，沒有轟轟烈烈的傳奇，卻在每一個平凡的勤務裡守住了分寸。退休茶會上，分局長親自頒發服務獎章，感謝你這些年的堅持。`
-      };
+      return {icon:'🏆', title:'模範警察退休', sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+        body:`${s.name}在崗位上兢兢業業${s.age-18}年，沒有轟轟烈烈的傳奇，卻在每一個平凡的勤務裡守住了分寸。退休茶會上，分局長親自頒發服務獎章，感謝你這些年的堅持。${famLine}`};
     }
     if (s.rankIdx <= 1){
-      return {
-        icon:'🚓', title:'基層老兵退休',
-        sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
-        body:`${s.name}一輩子沒離開過第一線，官階始終沒往上爬，但轄區裡的居民都認得你的臉。退休那天，巷口的早餐店老闆特地包了一份油飯，說「這條街少了你巡邏，會不習慣」。`
-      };
+      return {icon:'🚓', title:'基層老兵退休', sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+        body:`${s.name}一輩子沒離開過第一線，官階始終沒往上爬，但轄區裡的居民都認得你的臉。退休那天，巷口的早餐店老闆特地包了一份油飯。${famLine}`};
     }
-    return {
-      icon:'📁', title:'平凡卸下警徽',
-      sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
-      body:`${s.name}的警察生涯沒有大起，也沒有大落。功過相抵的考績表裡，寫著一個普通人如何在制度與人情之間，勉強維持住自己的樣子。`
-    };
+    return {icon:'📁', title:'平凡卸下警徽', sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
+      body:`${s.name}的警察生涯沒有大起，也沒有大落。功過相抵的考績表裡，寫著一個普通人如何在制度與人情之間，勉強維持住自己的樣子。${famLine}`};
   }
 
   function screenEnding(){
@@ -1045,11 +901,7 @@
     const s = state;
     const end = computeEnding(s);
     screen.innerHTML = `
-      <div class="end-badge">
-        <div class="rank-final">${end.icon}</div>
-        <h2>${end.title}</h2>
-        <div class="sub mono">${end.sub}</div>
-      </div>
+      <div class="end-badge"><div class="rank-final">${end.icon}</div><h2>${end.title}</h2><div class="sub mono">${end.sub}</div></div>
       <div class="end-body">${end.body}</div>
       <div class="final-stats">
         <div class="fs-item"><div class="n">${s.age}</div><div class="l">退役年齡</div></div>
@@ -1058,19 +910,11 @@
         <div class="fs-item"><div class="n">${s.salary}萬</div><div class="l">生涯薪資</div></div>
       </div>
       ${careerLogHTML()}
-      <div class="seedrow">
-        <span class="mono" id="seedDisplay2">種子碼：${s.seed}</span>
-        <button class="iconbtn" id="copySeed">複製</button>
-      </div>
+      <div class="seedrow"><span class="mono" id="seedDisplay2">種子碼：${s.seed}</span><button class="iconbtn" id="copySeed">複製</button></div>
       <button class="btn-primary" id="restartBtn">再模擬一次</button>
     `;
-    document.getElementById('copySeed').addEventListener('click', ()=>{
-      if (navigator.clipboard) navigator.clipboard.writeText(s.seed);
-    });
-    document.getElementById('restartBtn').addEventListener('click', ()=>{
-      state = null;
-      screenStart();
-    });
+    document.getElementById('copySeed').addEventListener('click', ()=>{ if (navigator.clipboard) navigator.clipboard.writeText(s.seed); });
+    document.getElementById('restartBtn').addEventListener('click', ()=>{ state = null; screenStart(); });
   }
 
   screenStart();
