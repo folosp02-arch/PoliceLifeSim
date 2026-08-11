@@ -104,6 +104,11 @@
   .fs-item .n{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;}
   .fs-item .l{font-size:10.5px;color:var(--text-dim2);margin-top:2px;}
   ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .feature-strip{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.feature-chip{border:1px solid var(--line);background:var(--bg2);padding:5px 8px;border-radius:999px;font-size:10.5px;color:var(--text-dim)}
+  .feature-chip b{color:var(--text);margin-left:3px}.npc-card{border:1px solid #34404d;background:#10151c;padding:12px;margin:10px 0}.npc-head{display:flex;justify-content:space-between;gap:8px}.npc-name{font-weight:800}.npc-meta{font-size:10px;color:var(--text-dim2);font-family:'IBM Plex Mono',monospace}.npc-rel{margin-top:7px;height:5px;background:#202731}.npc-rel i{display:block;height:100%;background:var(--blue)}
+  .achievement-box{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.achievement-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:8px}.ach{border:1px solid var(--line);padding:8px;background:var(--bg2);opacity:.42}.ach.unlocked{opacity:1;border-color:#62511d}.ach .ico{font-size:18px}.ach .nm{font-size:11px;font-weight:700}.ach .ds{font-size:9.5px;color:var(--text-dim2);line-height:1.35;margin-top:2px}.ach.unlocked .ds{color:var(--text-dim)}
+  .npc-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}.panel-title{font-size:10px;letter-spacing:.12em;color:var(--text-dim2);font-family:'IBM Plex Mono',monospace;margin-top:12px}
+
 </style>
 </head>
 <body>
@@ -448,6 +453,123 @@
       ]},
   ];
 
+
+  /* ================= NEW: 突發事件 / NPC同事 / 成就 ================= */
+  const COLLEAGUE_NAMES = ['林建宏','陳怡君','黃志豪','張少鵬','王俊傑','許雅婷','李承翰','周柏廷'];
+  const COLLEAGUE_ROLES = ['警員','巡佐','偵查佐','線上警力','小隊長'];
+  const NPC_EVENT_POOL = [
+    {id:'n1', title:'老同事的求救電話', text:(s,n)=>`${n.name}突然打電話給你：「兄弟，我這邊遇到一個棘手案件，你方便幫我看一下嗎？」`, choices:[
+      {label:'馬上過去幫忙', effects:{人脈:5,體能:-2}, npc:5, salary:6},
+      {label:'先請他把資料傳來', effects:{偵查:3,人脈:2}, npc:2, salary:4},
+      {label:'勤務太滿，婉拒', effects:{操守:1,人脈:-2}, npc:-3, salary:0}
+    ]},
+    {id:'n2', title:'同梯升官了', text:(s,n)=>`${n.name}傳來消息，他最近通過考核準備升任${n.rank}。你們約在勤務結束後吃個宵夜。`, choices:[
+      {label:'真心替他高興', effects:{人脈:4,操守:1}, npc:4, salary:0},
+      {label:'嘴上祝福，心裡有點不是滋味', effects:{偵查:1}, npc:0, salary:0},
+      {label:'趁機請教升遷心得', effects:{偵查:3,人脈:2}, npc:3, salary:0}
+    ]},
+    {id:'n3', title:'替同事扛勤務', text:(s,n)=>`${n.name}家裡臨時有事，卻剛好碰上最忙的勤務時段。他低聲問你：「能不能幫我頂一下？」`, choices:[
+      {label:'二話不說幫他頂', effects:{體能:-3,人脈:6}, npc:7, salary:5},
+      {label:'請他依程序找主管調整', effects:{操守:3,npc:0}, npc:1, salary:3},
+      {label:'直接拒絕，自己也有家庭', effects:{操守:1,人脈:-1}, npc:-2, salary:0}
+    ]},
+    {id:'n4', title:'前輩提醒', text:(s,n)=>`${n.name}私下提醒你：「最近有些事情很敏感，做人留一線，以後比較好走。」`, choices:[
+      {label:'記在心裡，凡事依法辦理', effects:{操守:5}, npc:3, salary:0},
+      {label:'問清楚到底發生什麼事', effects:{偵查:4}, npc:2, salary:0},
+      {label:'覺得他想太多', effects:{人脈:-2}, npc:-2, salary:0}
+    ]},
+    {id:'n5', title:'同事受傷', text:(s,n)=>`勤務中傳來消息：${n.name}在執勤時受傷，目前人在醫院。`, choices:[
+      {label:'立刻趕去醫院', effects:{人脈:5,體能:-1}, npc:8, salary:0},
+      {label:'先把勤務完成再去', effects:{操守:2}, npc:3, salary:0},
+      {label:'傳訊息關心一下', effects:{人脈:1}, npc:1, salary:0}
+    ]},
+    {id:'n6', title:'老搭檔的秘密', text:(s,n)=>`${n.name}告訴你一件多年來一直沒說的往事。你突然發現，這個一起值過無數夜班的人，比你想像中更了解你。`, choices:[
+      {label:'也分享自己的心事', effects:{人脈:5}, npc:6, salary:0},
+      {label:'認真聽完，不多問', effects:{操守:2}, npc:4, salary:0},
+      {label:'開玩笑帶過', effects:{體能:1}, npc:1, salary:0}
+    ]}
+  ];
+
+  const SUDDEN_EVENT_POOL = [
+    {id:'x1', title:'捷運站內緊急通報', text:'勤務途中，無線電突然傳來：捷運站內疑似有人持危險物品徘徊，現場民眾開始疏散。', choices:[
+      {label:'立即前往現場支援', effects:{體能:-3,偵查:5,操守:3}, salary:15},
+      {label:'先確認資訊再進場', effects:{偵查:5,操守:2}, salary:10},
+      {label:'留在原勤務點等候調度', effects:{人脈:2,操守:1}, salary:6}
+    ]},
+    {id:'x2', title:'嫌犯突然逃逸', text:'你正在製作勤務紀錄，嫌疑人突然掙脫往巷內逃跑，周圍民眾紛紛拿出手機拍攝。', choices:[
+      {label:'立即追捕', effects:{體能:-5,偵查:6}, salary:16, risky:true},
+      {label:'請線上警力包抄', effects:{人脈:5,偵查:3}, salary:10},
+      {label:'記下特徵並依法處理', effects:{操守:3,偵查:3}, salary:7}
+    ]},
+    {id:'x3', title:'民眾直播執法', text:'一名民眾正在直播你處理現場，留言區開始出現「警察是不是執法過當」的爭論。', choices:[
+      {label:'保持冷靜，完整依程序處理', effects:{操守:5,人脈:2}, salary:8},
+      {label:'主動向民眾說明狀況', effects:{人脈:5,操守:2}, salary:8},
+      {label:'情緒受到影響，先退到旁邊', effects:{體能:1,操守:-1}, salary:4}
+    ]},
+    {id:'x4', title:'深夜協尋', text:'勤務台通報一名孩童深夜走失，家屬情緒激動，附近監視器又剛好故障。', choices:[
+      {label:'逐路線徒步搜索', effects:{體能:-4,偵查:5,操守:3}, salary:12},
+      {label:'整合附近店家與民眾協尋', effects:{人脈:6,偵查:2}, salary:10},
+      {label:'先建立完整失蹤資料', effects:{偵查:4,操守:2}, salary:7}
+    ]},
+    {id:'x5', title:'長官臨時點名', text:'下班前長官突然點名你參加明早的重要勤務，今晚的私人行程全部得重新安排。', choices:[
+      {label:'留下來準備任務', effects:{操守:4,人脈:3,體能:-2}, salary:10},
+      {label:'依規定請長官重新調度', effects:{操守:3}, salary:5},
+      {label:'硬著頭皮接下來', effects:{人脈:2,體能:-3}, salary:8}
+    ]},
+    {id:'x6', title:'意外發現關鍵證物', text:'一個原本不起眼的細節，讓你發現案件可能還有另一條線索。', choices:[
+      {label:'立即回頭重新查證', effects:{偵查:7,體能:-2}, salary:15},
+      {label:'先請同事交叉確認', effects:{偵查:4,人脈:4}, salary:10},
+      {label:'依現有資料結案', effects:{操守:2}, salary:5}
+    ]},
+    {id:'x7', title:'同事突然請你支援', text:'尖峰勤務突然爆量，勤務台詢問你是否願意臨時支援另一個勤務點。', choices:[
+      {label:'直接支援', effects:{體能:-3,人脈:5}, salary:10},
+      {label:'請調度台評估警力', effects:{操守:3,人脈:2}, salary:6},
+      {label:'留守原勤務點', effects:{體能:1}, salary:4}
+    ]},
+    {id:'x8', title:'疑似違法關說', text:'一名熟人打電話，希望你對一件案件「睜一隻眼閉一隻眼」。', choices:[
+      {label:'明確拒絕並留下紀錄', effects:{操守:7,偵查:2}, salary:0, flag:'resisted_bribe'},
+      {label:'委婉拒絕，不想撕破臉', effects:{操守:3,人脈:-1}, salary:0},
+      {label:'答應幫忙看看', effects:{操守:-7,人脈:5}, salary:20, flag:'corrupt'}
+    ]}
+  ];
+
+  const ACHIEVEMENTS = [
+    {id:'first_choice', icon:'👮', name:'穿上警服', desc:'完成第一個人生抉擇', test:s=>s.stats.操守||true},
+    {id:'strong', icon:'💪', name:'體能怪物', desc:'體能達到90', test:s=>s.stats.體能>=90},
+    {id:'detective', icon:'🔍', name:'破案高手', desc:'偵查達到90', test:s=>s.stats.偵查>=90},
+    {id:'network', icon:'🤝', name:'警界人脈', desc:'人脈達到90', test:s=>s.stats.人脈>=90},
+    {id:'integrity', icon:'⚖️', name:'廉潔典範', desc:'操守達到90', test:s=>s.stats.操守>=90},
+    {id:'rank', icon:'⭐', name:'一路升官', desc:'晉升至高階警職', test:s=>s.rankIdx>=5},
+    {id:'salary', icon:'💰', name:'薪資破千', desc:'生涯薪資突破1000萬', test:s=>s.salary>=1000},
+    {id:'married', icon:'💍', name:'人生伴侶', desc:'成功結婚', test:s=>s.relStatus==='married'},
+    {id:'parent', icon:'👶', name:'成為父母', desc:'迎來第一個孩子', test:s=>s.kids>=1},
+    {id:'npc_friend', icon:'🫡', name:'生死之交', desc:'與一名同事成為摯友', test:s=>s.colleagues?.some(n=>n.relation>=85)},
+    {id:'npc_many', icon:'👥', name:'同袍滿天下', desc:'三名同事關係都達70以上', test:s=>s.colleagues?.filter(n=>n.relation>=70).length>=3},
+    {id:'sudden5', icon:'🚨', name:'臨危不亂', desc:'完成5次突發事件', test:s=>(s.counters?.sudden||0)>=5},
+    {id:'sudden10', icon:'📻', name:'勤務老鳥', desc:'完成10次突發事件', test:s=>(s.counters?.sudden||0)>=10},
+    {id:'clean', icon:'🛡️', name:'守住底線', desc:'拒絕違法關說', test:s=>!!s.flags.resisted_bribe},
+    {id:'brave', icon:'🎖️', name:'勇敢第一線', desc:'成功完成高風險追捕', test:s=>(s.counters?.riskySuccess||0)>=1},
+    {id:'survive', icon:'🧓', name:'平安退休', desc:'活著走完正常生涯', test:s=>s.age>=RETIRE_AGE && !s.flags.duty_death},
+    {id:'legend', icon:'🏅', name:'警界傳奇', desc:'達成警界名人堂條件', test:s=>s.stats.操守>=75&&overall(s)>=70&&s.rankIdx>=5},
+    {id:'veteran', icon:'🏆', name:'老兵不死', desc:'延任後仍完成額外生涯', test:s=>s.flags.usedExtend},
+    {id:'seed', icon:'🧬', name:'命運重現', desc:'使用種子完成一次完整生涯', test:s=>s.age>=RETIRE_AGE},
+    {id:'allround', icon:'🌟', name:'六邊形戰士', desc:'四項能力皆達80', test:s=>Object.values(s.stats).every(v=>v>=80)}
+  ];
+
+  function checkAchievements(s){
+    if (!s.achievements) s.achievements = {};
+    ACHIEVEMENTS.forEach(a=>{ if (!s.achievements[a.id] && a.test(s)) s.achievements[a.id] = true; });
+  }
+  function achievementCount(s){ return ACHIEVEMENTS.filter(a=>s.achievements&&s.achievements[a.id]).length; }
+  function achievementsHTML(s, compact=false){
+    checkAchievements(s);
+    if (compact) return `<div class="feature-strip"><span class="feature-chip">🏅 成就 <b>${achievementCount(s)}/${ACHIEVEMENTS.length}</b></span><span class="feature-chip">🚨 突發 <b>${s.counters?.sudden||0}</b></span><span class="feature-chip">👥 同袍 <b>${s.colleagues?.filter(n=>n.relation>=70).length||0}/3</b></span></div>`;
+    return `<div class="achievement-box"><div class="panel-title">ACHIEVEMENTS · 生涯成就 ${achievementCount(s)}/${ACHIEVEMENTS.length}</div><div class="achievement-grid">${ACHIEVEMENTS.map(a=>`<div class="ach ${s.achievements[a.id]?'unlocked':''}"><div class="ico">${a.icon}</div><div class="nm">${s.achievements[a.id]?a.name:'???'}</div><div class="ds">${a.desc}</div></div>`).join('')}</div></div>`;
+  }
+  function colleaguesHTML(s){
+    return `<div class="npc-list">${s.colleagues.map(n=>`<div class="npc-card"><div class="npc-head"><div><span class="npc-name">👮 ${n.name}</span> <span class="npc-meta">${n.role}</span></div><span class="npc-meta">${n.relation>=85?'摯友':n.relation>=70?'好友':n.relation>=45?'熟識':'普通'}</span></div><div class="npc-meta" style="margin-top:4px">${n.rank} · 相識${Math.max(1,s.age-n.metAge+1)}年</div><div class="npc-rel"><i style="width:${n.relation}%"></i></div></div>`).join('')}</div>`;
+  }
+
   /* ================= STATE ================= */
   let state = null;
 
@@ -461,7 +583,13 @@
       age: 18, year: 2026, rankIdx: 1, salary: 0, stats: stats,
       relStatus:'single', relStat:50, partnerName:null, kids:0,
       mode:'career', extendRemaining:0, flags: {}, log: [],
-      used:{academy:[],duty:[],senior:[],romSingle:[],romDating:[],romNoKids:[],romKids:[],romAny:[],romDiv:[]},
+      counters:{sudden:0,riskySuccess:0,npcEvents:0}, achievements:{},
+      colleagues: [
+        {name:COLLEAGUE_NAMES[Math.floor(rng()*COLLEAGUE_NAMES.length)], role:COLLEAGUE_ROLES[Math.floor(rng()*COLLEAGUE_ROLES.length)], rank:'警員', relation:55, metAge:18},
+        {name:COLLEAGUE_NAMES[Math.floor(rng()*COLLEAGUE_NAMES.length)], role:COLLEAGUE_ROLES[Math.floor(rng()*COLLEAGUE_ROLES.length)], rank:'警員', relation:50, metAge:19},
+        {name:COLLEAGUE_NAMES[Math.floor(rng()*COLLEAGUE_NAMES.length)], role:COLLEAGUE_ROLES[Math.floor(rng()*COLLEAGUE_ROLES.length)], rank:'警員', relation:45, metAge:20}
+      ],
+      used:{academy:[],duty:[],senior:[],romSingle:[],romDating:[],romNoKids:[],romKids:[],romAny:[],romDiv:[],npc:[],sudden:[]},
       fileNumber: String(1000 + Math.floor(rng()*8999)),
     };
   }
@@ -546,13 +674,30 @@
     40: s=>milestoneMidlife(s),
   };
 
+
+  function drawNpcRound(s){
+    const npcIndex=Math.floor(s.rng()*s.colleagues.length);
+    const npc=s.colleagues[npcIndex];
+    const ev=drawFromPool(NPC_EVENT_POOL,s.used.npc);
+    return {kind:'npc', category:'npc', npcIndex, label:ev.title, fileNo:`AGE ${s.age} · 同袍交情`, romance:false, title:ev.title, text:ev.text(s,npc), choices:ev.choices};
+  }
+  function drawSuddenRound(s){
+    const ev=drawFromPool(SUDDEN_EVENT_POOL,s.used.sudden);
+    return {kind:'sudden', category:'sudden', label:ev.title, fileNo:`AGE ${s.age} · 突發勤務`, romance:false, title:ev.title, text:ev.text, choices:ev.choices};
+  }
+
   function getRound(s){
     if (MILESTONE_AGES[s.age]) return MILESTONE_AGES[s.age](s);
     if (s.age>=18 && s.age<=20){
       const ev = drawFromPool(ACADEMY_POOL, s.used.academy);
       return {kind:'normal', category:'academy', label:ev.title, fileNo:`AGE ${s.age} · 警專養成`, romance:false, title:ev.title, text:ev.text(s), choices:ev.choices};
     }
-    const romChance = s.age>=48 ? 0.28 : 0.4;
+    // 突發事件：約22%，會取代當年的一般勤務，讓每一年都有意外可能。
+    if (s.rng() < 0.22){ return drawSuddenRound(s); }
+    // NPC同事事件：約18%，隨著人脈與年資提升更容易遇到。
+    const npcChance = s.stats.人脈>=70 ? 0.24 : 0.18;
+    if (s.rng() < npcChance){ return drawNpcRound(s); }
+    const romChance = s.age>=48 ? 0.28 : 0.34;
     if (s.age>=22 && s.rng() < romChance){
       const rp = romancePoolFor(s);
       if (rp){
@@ -581,7 +726,8 @@
     statusbar.innerHTML = `
       <div class="row1"><span class="rank">${rankName(s)} · ${s.name}</span><span class="meta mono">${s.age}歲 / ${s.year}年 / ${s.salary}萬</span></div>
       <div class="statbars">${statItem('體能', s.stats.體能, 'body')}${statItem('偵查', s.stats.偵查, 'inv')}${statItem('人脈', s.stats.人脈, 'rel')}${statItem('操守', s.stats.操守, 'int')}</div>
-      <div class="relline">♥ ${relLabel(s)}</div>`;
+      <div class="relline">♥ ${relLabel(s)}</div>
+      ${achievementsHTML(s,true)}`;
   }
   function statItem(label, val, cls){
     return `<div class="statitem"><div class="lbl"><span>${label}</span><b>${val}</b></div><div class="track"><div class="fill ${cls}" style="width:${val}%"></div></div></div>`;
@@ -636,6 +782,7 @@
         const name = document.getElementById('nameInput').value.trim() || '無名警員';
         state = initState(seed, name, selectedTrack);
         pushLog('剛從警專校門走出來，未來還是一片空白。');
+        checkAchievements(state);
         screenRound();
       });
     }
@@ -656,6 +803,7 @@
         <div class="file-title">${round.title}</div>
         <div class="file-body">${round.text}</div>
       </div>
+      ${round.kind==='npc'?`<div class="panel-title">同袍資料</div>${colleaguesHTML(s)}`:''}
       <div class="choices" id="choiceWrap"></div>
       ${careerLogHTML()}
     `;
@@ -673,7 +821,41 @@
     const s = state;
     let stampHTML = '', tierLineHTML = '', resultText = '', applied = {}, salaryDelta = 0, relDelta = 0;
 
-    if (round.kind==='exam'){
+    if (round.kind==='npc'){
+      const npc = s.colleagues[round.npcIndex ?? 0];
+      const outcome = rollOutcome(s.rng);
+      const scaled = scaleEffects(choice.effects, outcome.mult);
+      applied = applyEffects(s, scaled);
+      salaryDelta = Math.round((choice.salary||0)*outcome.mult);
+      s.salary += salaryDelta;
+      relDelta = Math.round((choice.npc||0)*outcome.mult);
+      npc.relation = clamp(npc.relation + relDelta);
+      s.counters.npcEvents += 1;
+      if (npc.relation>=85) s.flags.npc_best = true;
+      resultText = `${choice.label}——${npc.name}記住了你的選擇。${pickLine('duty', outcome.tier, s.rng)}`;
+      stampHTML = `<div class="stamp ${outcome.tier==='bad'?'bad':'gold'}">同袍 · ${npc.relation>=85?'摯友':'交情+'+relDelta}</div>`;
+      tierLineHTML = outcome.tier==='great'||outcome.tier==='bad' ? `<div class="tierline ${outcome.tier}">${TIER_LABEL[outcome.tier]}</div>` : '';
+    } else if (round.kind==='sudden'){
+      const risky = !!choice.risky;
+      if (risky && s.rng()<0.04){
+        applied = applyEffects(s, choice.effects);
+        salaryDelta = choice.salary||0; s.salary += salaryDelta;
+        s.flags.duty_death = true;
+        s.counters.sudden += 1;
+        pushLog(`【突發勤務｜${round.label}】${choice.label}。執勤中不幸殉職。`);
+        finishRound(`<div class="stamp bad">突發 · 殉職</div>`, '', '這次突發勤務成為你人生最後一場任務。', applied, salaryDelta, 0, round); return;
+      }
+      const outcome = rollOutcome(s.rng);
+      const scaled = scaleEffects(choice.effects, outcome.mult);
+      applied = applyEffects(s, scaled);
+      salaryDelta = Math.round((choice.salary||0)*outcome.mult); s.salary += salaryDelta;
+      s.counters.sudden += 1;
+      if (risky) s.counters.riskySuccess += 1;
+      if (choice.flag) s.flags[choice.flag] = true;
+      resultText = `${choice.label}——${pickLine('duty', outcome.tier, s.rng)}`;
+      stampHTML = `<div class="stamp ${outcome.tier==='bad'?'bad':'gold'}">突發 · ${outcome.tier==='great'?'漂亮處置':'事件處理'}</div>`;
+      tierLineHTML = outcome.tier==='great'||outcome.tier==='bad' ? `<div class="tierline ${outcome.tier}">${TIER_LABEL[outcome.tier]}</div>` : '';
+    } else if (round.kind==='exam'){
       applied = applyEffects(s, choice.effects);
       s.salary += (choice.salary||0);
       const chance = clamp01((s.stats.偵查*0.4 + s.stats.人脈*0.35 + s.stats.操守*0.15 + s.stats.體能*0.10)/99 + (choice.examBonus||0));
@@ -769,6 +951,7 @@
       tierLineHTML = (outcome.tier==='normal'||outcome.tier==='minor') ? '' : '';
     }
 
+    checkAchievements(s);
     pushLog(`【${round.label}】${choice.label}。${resultText}`);
     finishRound(stampHTML, tierLineHTML, resultText, applied, salaryDelta, relDelta, round);
   }
@@ -787,7 +970,7 @@
     renderStatus();
     document.getElementById('continueBtn').addEventListener('click', ()=>{
       if (s.flags.duty_death){ screenEnding(); return; }
-      if (s.mode==='career'){ s.age += 1; s.year += 1; screenRound(); }
+      if (s.mode==='career'){ s.age += 1; s.year += 1; checkAchievements(s); screenRound(); }
       else { s.extendRemaining -= 1; s.age += 1; s.year += 1; if (s.extendRemaining<=0){ screenEnding(); } else { screenRound(); } }
     });
   }
@@ -843,10 +1026,10 @@
       } else {
         resultText = `你在崗位上撐到了屆齡的最後一天，階級停在「${rankName(s)}」，但沒有人能說你不夠拚。`;
       }
-      s.mode='extend'; s.extendRemaining=3;
+      s.mode='extend'; s.extendRemaining=3; s.flags.usedExtend=true;
     } else if (choice.key==='advise'){
       resultText = `你婉拒了退休，接受借調成為顧問，繼續在會議室裡發揮多年辦案經驗。`;
-      s.mode='extend'; s.extendRemaining=2;
+      s.mode='extend'; s.extendRemaining=2; s.flags.usedExtend=true;
     } else {
       resultText = `你在核准的第一天就送出退休申請，準備把時間留給自己與${s.relStatus==='married'?s.partnerName:'家人'}。`;
       s.mode='extend'; s.extendRemaining=0;
@@ -910,6 +1093,9 @@
         <div class="fs-item"><div class="n">${s.salary}萬</div><div class="l">生涯薪資</div></div>
       </div>
       ${careerLogHTML()}
+      <div class="panel-title">同袍關係</div>
+      ${colleaguesHTML(s)}
+      ${achievementsHTML(s,false)}
       <div class="seedrow"><span class="mono" id="seedDisplay2">種子碼：${s.seed}</span><button class="iconbtn" id="copySeed">複製</button></div>
       <button class="btn-primary" id="restartBtn">再模擬一次</button>
     `;
