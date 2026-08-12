@@ -108,6 +108,10 @@
   .feature-chip b{color:var(--text);margin-left:3px}.npc-card{border:1px solid #34404d;background:#10151c;padding:12px;margin:10px 0}.npc-head{display:flex;justify-content:space-between;gap:8px}.npc-name{font-weight:800}.npc-meta{font-size:10px;color:var(--text-dim2);font-family:'IBM Plex Mono',monospace}.npc-rel{margin-top:7px;height:5px;background:#202731}.npc-rel i{display:block;height:100%;background:var(--blue)}
   .achievement-box{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.achievement-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:8px}.ach{border:1px solid var(--line);padding:8px;background:var(--bg2);opacity:.42}.ach.unlocked{opacity:1;border-color:#62511d}.ach .ico{font-size:18px}.ach .nm{font-size:11px;font-weight:700}.ach .ds{font-size:9.5px;color:var(--text-dim2);line-height:1.35;margin-top:2px}.ach.unlocked .ds{color:var(--text-dim)}
   .npc-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}.panel-title{font-size:10px;letter-spacing:.12em;color:var(--text-dim2);font-family:'IBM Plex Mono',monospace;margin-top:12px}
+  .trend-wrap{border:1px solid var(--line);background:var(--bg);border-radius:var(--radius);padding:10px 12px;margin-top:8px}
+  .trend-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--text-dim);margin-top:6px}
+  .trend-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  .twist-line{font-size:11.5px;color:var(--pink);border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;line-height:1.7}
 
 </style>
 </head>
@@ -140,15 +144,48 @@
   function genSeed(len){ len=len||8; let s=""; for(let i=0;i<len;i++) s+=ALPHABET[Math.floor(Math.random()*ALPHABET.length)]; return s; }
   function clamp(v){ return Math.max(0, Math.min(99, Math.round(v))); }
   function clamp01(v){ return Math.max(0.05, Math.min(0.95, v)); }
+  function clamp01to(v, lo, hi){ lo = (lo==null)?0.01:lo; hi=(hi==null)?0.08:hi; return Math.max(lo, Math.min(hi, v)); }
 
   /* ================= OUTCOME VARIANCE SYSTEM ================= */
-  /* Every non-milestone choice rolls a tier so identical choices can still play out differently. */
-  function rollOutcome(rng){
+  /* Every non-milestone choice rolls a tier so identical choices can still play out differently.
+     The relevant stat now tilts the odds — a higher skill genuinely makes success more likely,
+     it just never guarantees it. */
+  function rollOutcome(rng, skill){
+    const sk = (skill==null) ? 50 : skill;
+    const f = (sk-50)/50; // -1..1
+    let pGreat = 0.15 + f*0.13;
+    let pBad   = 0.10 - f*0.07;
+    let pMinor = 0.25 - f*0.05;
+    pGreat = Math.max(0.03, Math.min(0.55, pGreat));
+    pBad   = Math.max(0.02, Math.min(0.35, pBad));
+    pMinor = Math.max(0.08, Math.min(0.35, pMinor));
+    let pNormal = 1 - pGreat - pBad - pMinor;
+    if (pNormal < 0.12){ pNormal = 0.12; }
+    const sum = pGreat+pBad+pMinor+pNormal;
+    pGreat/=sum; pBad/=sum; pMinor/=sum; pNormal/=sum;
     const r = rng();
-    if (r<0.15) return {tier:'great', mult:1.5};
-    if (r<0.65) return {tier:'normal', mult:1.0};
-    if (r<0.90) return {tier:'minor', mult:0.55};
+    if (r < pGreat) return {tier:'great', mult:1.5};
+    if (r < pGreat+pNormal) return {tier:'normal', mult:1.0};
+    if (r < pGreat+pNormal+pMinor) return {tier:'minor', mult:0.55};
     return {tier:'bad', mult:-0.35};
+  }
+  function primaryStat(effects){
+    let best=null, bestV=0;
+    Object.keys(effects||{}).forEach(k=>{
+      if (['體能','偵查','人脈','操守'].includes(k) && effects[k]>bestV){ bestV=effects[k]; best=k; }
+    });
+    return best;
+  }
+  function skillFor(s, round, choice){
+    if (round.kind==='npc') return s.stats.人脈;
+    if (round.romance) return Math.round((s.stats.人脈 + s.relStat)/2);
+    const ps = primaryStat(choice.effects);
+    if (ps) return s.stats[ps];
+    return overall(s);
+  }
+  function nudgeReputation(s, tier){
+    const delta = tier==='great' ? 3 : (tier==='bad' ? -3 : 0);
+    if (delta) s.reputation = clamp(s.reputation + delta);
   }
   function scaleEffects(effects, mult){
     const out = {};
@@ -553,7 +590,9 @@
     {id:'legend', icon:'🏅', name:'警界傳奇', desc:'達成警界名人堂條件', test:s=>s.stats.操守>=75&&overall(s)>=70&&s.rankIdx>=5},
     {id:'veteran', icon:'🏆', name:'老兵不死', desc:'延任後仍完成額外生涯', test:s=>s.flags.usedExtend},
     {id:'seed', icon:'🧬', name:'命運重現', desc:'使用種子完成一次完整生涯', test:s=>s.age>=RETIRE_AGE},
-    {id:'allround', icon:'🌟', name:'六邊形戰士', desc:'四項能力皆達80', test:s=>Object.values(s.stats).every(v=>v>=80)}
+    {id:'allround', icon:'🌟', name:'六邊形戰士', desc:'四項能力皆達80', test:s=>Object.values(s.stats).every(v=>v>=80)},
+    {id:'facade', icon:'🎭', name:'表裡人生', desc:'聲望與真實操守出現明顯落差', test:s=>(s.reputation-s.stats.操守)>=25 && s.reputation>=55},
+    {id:'trusted', icon:'📣', name:'眾望所歸', desc:'外界聲望達到85', test:s=>s.reputation>=85},
   ];
 
   function checkAchievements(s){
@@ -566,6 +605,29 @@
     if (compact) return `<div class="feature-strip"><span class="feature-chip">🏅 成就 <b>${achievementCount(s)}/${ACHIEVEMENTS.length}</b></span><span class="feature-chip">🚨 突發 <b>${s.counters?.sudden||0}</b></span><span class="feature-chip">👥 同袍 <b>${s.colleagues?.filter(n=>n.relation>=70).length||0}/3</b></span></div>`;
     return `<div class="achievement-box"><div class="panel-title">ACHIEVEMENTS · 生涯成就 ${achievementCount(s)}/${ACHIEVEMENTS.length}</div><div class="achievement-grid">${ACHIEVEMENTS.map(a=>`<div class="ach ${s.achievements[a.id]?'unlocked':''}"><div class="ico">${a.icon}</div><div class="nm">${s.achievements[a.id]?a.name:'???'}</div><div class="ds">${a.desc}</div></div>`).join('')}</div></div>`;
   }
+  function renderTrendChart(s){
+    const hist = s.history||[];
+    if (hist.length<2) return '';
+    const minAge = hist[0].age, maxAge = hist[hist.length-1].age;
+    const w=300, h=110, pad=6;
+    function pt(age,val){
+      const x = pad + (maxAge===minAge?0:(age-minAge)/(maxAge-minAge))*(w-2*pad);
+      const y = pad + (1-val/99)*(h-2*pad);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }
+    const lines = [
+      {key:'體能',color:'#f2b705'}, {key:'偵查',color:'#3f7ea6'},
+      {key:'人脈',color:'#7fa06f'}, {key:'操守',color:'#c98fd6'}, {key:'聲望',color:'#e07a9a'},
+    ];
+    const polylines = lines.map(l=>{
+      const points = hist.map(pt2=>pt(pt2.age,pt2[l.key])).join(' ');
+      return `<polyline points="${points}" fill="none" stroke="${l.color}" stroke-width="1.8" opacity="0.92" />`;
+    }).join('');
+    const legend = lines.map(l=>`<span><i style="background:${l.color}"></i>${l.key}</span>`).join('');
+    return `<div class="panel-title">生涯數值走勢（${minAge}歲 → ${maxAge}歲）</div>
+      <div class="trend-wrap"><svg viewBox="0 0 ${w} ${h}" width="100%" height="120" preserveAspectRatio="none">${polylines}</svg>
+      <div class="trend-legend">${legend}</div></div>`;
+  }
   function colleaguesHTML(s){
     return `<div class="npc-list">${s.colleagues.map(n=>`<div class="npc-card"><div class="npc-head"><div><span class="npc-name">👮 ${n.name}</span> <span class="npc-meta">${n.role}</span></div><span class="npc-meta">${n.relation>=85?'摯友':n.relation>=70?'好友':n.relation>=45?'熟識':'普通'}</span></div><div class="npc-meta" style="margin-top:4px">${n.rank} · 相識${Math.max(1,s.age-n.metAge+1)}年</div><div class="npc-rel"><i style="width:${n.relation}%"></i></div></div>`).join('')}</div>`;
   }
@@ -573,16 +635,27 @@
   /* ================= STATE ================= */
   let state = null;
 
+  const ERA_FLAVORS = [
+    '你入行那年，正好是全國「治平專案」雷厲風行的時期，上頭盯業績盯得特別緊。',
+    '這一年警界剛經歷組織改造，基層士氣有點動盪，人人都在觀望。',
+    '你入行時，社會正吹起一股「有正義感」的從警熱潮，同梯個個滿懷理想。',
+    '這年適逢多起重大治安事件，警力調度吃緊，加班成了家常便飯。',
+    '景氣正好，警界福利與裝備都比往年充裕，同事間士氣不錯。',
+    '這一年反貪腐的輿論聲量特別高，督察系統風聲鶴唳。',
+    '社群直播剛開始盛行，執勤時常常有人舉著手機在旁邊拍。',
+  ];
+
   function initState(seedStr, name, trackId){
     const rng = makeRng(seedStr);
     const track = TRACKS.find(t=>t.id===trackId) || TRACKS[0];
     const stats = {體能:0,偵查:0,人脈:0,操守:0};
     Object.keys(stats).forEach(k=>{ stats[k] = clamp(Math.round(16 + rng()*13) + (track.bonus[k]||0)); });
+    const era = ERA_FLAVORS[Math.floor(rng()*ERA_FLAVORS.length)];
     return {
-      seed: seedStr, rng: rng, name: name || '無名警員', track: track,
-      age: 18, year: 2026, rankIdx: 1, salary: 0, stats: stats,
+      seed: seedStr, rng: rng, name: name || '無名警員', track: track, era: era,
+      age: 18, year: 2026, rankIdx: 1, salary: 0, stats: stats, reputation: 50,
       relStatus:'single', relStat:50, partnerName:null, kids:0,
-      mode:'career', extendRemaining:0, flags: {}, log: [],
+      mode:'career', extendRemaining:0, flags: {}, log: [], history: [],
       counters:{sudden:0,riskySuccess:0,npcEvents:0}, achievements:{},
       colleagues: [
         {name:COLLEAGUE_NAMES[Math.floor(rng()*COLLEAGUE_NAMES.length)], role:COLLEAGUE_ROLES[Math.floor(rng()*COLLEAGUE_ROLES.length)], rank:'警員', relation:55, metAge:18},
@@ -592,6 +665,9 @@
       used:{academy:[],duty:[],senior:[],romSingle:[],romDating:[],romNoKids:[],romKids:[],romAny:[],romDiv:[],npc:[],sudden:[]},
       fileNumber: String(1000 + Math.floor(rng()*8999)),
     };
+  }
+  function pushHistory(s){
+    s.history.push({age:s.age, 體能:s.stats.體能, 偵查:s.stats.偵查, 人脈:s.stats.人脈, 操守:s.stats.操守, 聲望:s.reputation});
   }
 
   function overall(s){ return Math.round((s.stats.體能 + s.stats.偵查 + s.stats.人脈)/3); }
@@ -727,6 +803,7 @@
       <div class="row1"><span class="rank">${rankName(s)} · ${s.name}</span><span class="meta mono">${s.age}歲 / ${s.year}年 / ${s.salary}萬</span></div>
       <div class="statbars">${statItem('體能', s.stats.體能, 'body')}${statItem('偵查', s.stats.偵查, 'inv')}${statItem('人脈', s.stats.人脈, 'rel')}${statItem('操守', s.stats.操守, 'int')}</div>
       <div class="relline">♥ ${relLabel(s)}</div>
+      <div class="relline" style="color:var(--text-dim2)">📣 外界聲望 ${s.reputation}／真實操守 ${s.stats.操守}</div>
       ${achievementsHTML(s,true)}`;
   }
   function statItem(label, val, cls){
@@ -746,7 +823,7 @@
       screen.innerHTML = `
         <div class="hero-eyebrow mono">CASE FILE · 招募中</div>
         <h1 class="title">警察人生<br>模擬程式<em>POLICE LIFE — 一場種子化的警察生涯模擬</em></h1>
-        <p class="tagline">從警專新生到警界名人堂，每一年都有新的抉擇——升遷、辦案、關說與愛情，結果隨機率而定，全部種子化重現。</p>
+        <p class="tagline">從警專新生到警界名人堂，每一年都有新的抉擇——升遷、辦案、關說與愛情。數值越硬，成功機率越高，但從沒有穩贏；外界聲望和真實操守，也未必是同一回事。</p>
         <div class="card">
           <div class="field"><label>姓名</label><input type="text" id="nameInput" maxlength="12" placeholder="輸入你的警員姓名"></div>
           <div class="field"><label>警種選擇</label><div class="track-grid" id="trackGrid"></div></div>
@@ -782,6 +859,8 @@
         const name = document.getElementById('nameInput').value.trim() || '無名警員';
         state = initState(seed, name, selectedTrack);
         pushLog('剛從警專校門走出來，未來還是一片空白。');
+        pushLog(state.era);
+        pushHistory(state);
         checkAchievements(state);
         screenRound();
       });
@@ -823,7 +902,8 @@
 
     if (round.kind==='npc'){
       const npc = s.colleagues[round.npcIndex ?? 0];
-      const outcome = rollOutcome(s.rng);
+      const outcome = rollOutcome(s.rng, skillFor(s, round, choice));
+      nudgeReputation(s, outcome.tier);
       const scaled = scaleEffects(choice.effects, outcome.mult);
       applied = applyEffects(s, scaled);
       salaryDelta = Math.round((choice.salary||0)*outcome.mult);
@@ -837,7 +917,8 @@
       tierLineHTML = outcome.tier==='great'||outcome.tier==='bad' ? `<div class="tierline ${outcome.tier}">${TIER_LABEL[outcome.tier]}</div>` : '';
     } else if (round.kind==='sudden'){
       const risky = !!choice.risky;
-      if (risky && s.rng()<0.04){
+      const deathChance = clamp01to(0.04 - (s.stats.體能-50)/50*0.025);
+      if (risky && s.rng()<deathChance){
         applied = applyEffects(s, choice.effects);
         salaryDelta = choice.salary||0; s.salary += salaryDelta;
         s.flags.duty_death = true;
@@ -845,7 +926,8 @@
         pushLog(`【突發勤務｜${round.label}】${choice.label}。執勤中不幸殉職。`);
         finishRound(`<div class="stamp bad">突發 · 殉職</div>`, '', '這次突發勤務成為你人生最後一場任務。', applied, salaryDelta, 0, round); return;
       }
-      const outcome = rollOutcome(s.rng);
+      const outcome = rollOutcome(s.rng, skillFor(s, round, choice));
+      nudgeReputation(s, outcome.tier);
       const scaled = scaleEffects(choice.effects, outcome.mult);
       applied = applyEffects(s, scaled);
       salaryDelta = Math.round((choice.salary||0)*outcome.mult); s.salary += salaryDelta;
@@ -862,9 +944,11 @@
       if (s.rng() < chance){
         s.rankIdx = Math.min(round.rankTarget, RANKS.length-1);
         s.salary += 60;
+        s.reputation = clamp(s.reputation + 4);
         stampHTML = `<div class="stamp">考核 · 及格</div>`;
         resultText = `放榜當天，你的名字出現在合格名單上——晉任「${rankName(s)}」。`;
       } else {
+        s.reputation = clamp(s.reputation - 1);
         stampHTML = `<div class="stamp bad">考核 · 未通過</div>`;
         resultText = `差了臨門一腳，這次考核未能通過。主管拍拍你的肩：「下一次。」`;
         applied = Object.assign(applied, applyEffects(s, {偵查:1}));
@@ -878,10 +962,12 @@
       const vLine = MILESTONE_VARIANT_LINES[round.mkey][vt];
       const nudge = vt==='great'?2:(vt==='bad'?-2:0);
       if (nudge){ const extra = applyEffects(s, {人脈:nudge}); applied.人脈 = (applied.人脈||0)+(extra.人脈||0); }
+      // corrupt choices buy reputation with money, not virtue — the two tracks stay independent
+      if (!bad) nudgeReputation(s, vt);
       resultText = vLine;
       stampHTML = `<div class="stamp ${bad?'bad':(vt==='great'?'gold':'')}">案件 · ${bad?'列管':'結案'}</div>`;
     } else if (round.romance){
-      const outcome = rollOutcome(s.rng);
+      const outcome = rollOutcome(s.rng, skillFor(s, round, choice));
       const scaled = scaleEffects(choice.effects, outcome.mult);
       applied = applyEffects(s, scaled);
       salaryDelta = Math.round((choice.salary||0)*outcome.mult);
@@ -929,7 +1015,8 @@
       // normal duty / academy / senior
       if (choice.risky){
         const dieRoll = s.rng();
-        if (dieRoll < 0.04){
+        const deathChance = clamp01to(0.04 - (s.stats.體能-50)/50*0.025);
+        if (dieRoll < deathChance){
           applied = applyEffects(s, choice.effects);
           s.salary += (choice.salary||0);
           s.flags.duty_death = true;
@@ -940,7 +1027,8 @@
           return;
         }
       }
-      const outcome = rollOutcome(s.rng);
+      const outcome = rollOutcome(s.rng, skillFor(s, round, choice));
+      nudgeReputation(s, outcome.tier);
       const scaled = scaleEffects(choice.effects, outcome.mult);
       applied = applyEffects(s, scaled);
       salaryDelta = Math.round((choice.salary||0)*outcome.mult);
@@ -958,6 +1046,7 @@
 
   function finishRound(stampHTML, tierLineHTML, resultText, applied, salaryDelta, relDelta, round){
     const s = state;
+    pushHistory(s);
     screen.innerHTML = `
       <div class="resolve-wrap">
         ${stampHTML}
@@ -1035,6 +1124,7 @@
       s.mode='extend'; s.extendRemaining=0;
     }
     pushLog(`【退休抉擇】${choice.label}。${resultText}`);
+    pushHistory(s);
     screen.innerHTML = `
       <div class="resolve-wrap">
         <div class="stamp gold">生涯 · ${s.extendRemaining>0?'延任':'完結'}</div>
@@ -1062,6 +1152,10 @@
     if (integ <= 25 && (s.flags.corrupt || s.flags.corrupt2)){
       return {icon:'⚠️', title:'貪瀆去職', sub:`除警籍 · 末代階級 ${rankName(s)}`,
         body:`廉政署的調查小組在一次金流稽核中盯上了${s.name}。收賄的證據一項項浮出水面，最終被依貪污治罪條例起訴、除籍收押。年輕時穿上制服的驕傲，換來的是新聞跑馬燈上一閃而過的名字。`};
+    }
+    if (s.reputation - integ >= 25 && s.reputation >= 55){
+      return {icon:'🎭', title:'表裡不一退休', sub:`外界聲望 ${s.reputation} ／ 真實操守 ${integ}`,
+        body:`在同事與轄區民眾眼中，${s.name}是個熱心、能幹又有交情的好警察，退休歡送會上掌聲不斷。只有你自己知道，這些年有些帳，是靠著犧牲一點原則換來的。這份落差，成了你退休後偶爾在深夜想起的事。${famLine}`};
     }
     if (integ >= 75 && ov >= 70 && s.rankIdx >= 5){
       return {icon:'🏅', title:'警界名人堂', sub:`${rankName(s)} · 生涯薪資 ${s.salary}萬`,
@@ -1092,6 +1186,7 @@
         <div class="fs-item"><div class="n">${s.stats.操守}</div><div class="l">操守指數</div></div>
         <div class="fs-item"><div class="n">${s.salary}萬</div><div class="l">生涯薪資</div></div>
       </div>
+      ${renderTrendChart(s)}
       ${careerLogHTML()}
       <div class="panel-title">同袍關係</div>
       ${colleaguesHTML(s)}
